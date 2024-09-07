@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS shares;
+DROP TABLE IF EXISTS files;
+
+CREATE TABLE shares (
+    md5 TEXT PRIMARY KEY,
+    path TEXT NOT NULL
+);
+
+CREATE TABLE files (
+    sharemd5 TEXT NOT NULL,
+    md5 TEXT PRIMARY KEY,
+    path TEXT NOT NULL
+);
