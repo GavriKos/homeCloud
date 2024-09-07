@@ -1,6 +1,14 @@
 from flask import Flask, request, send_file, render_template, g
 import sqlite3
 import os, json
+import hashlib
+
+def calculate_md5(path):
+    md5_hash = hashlib.md5()
+    md5_hash.update(path.encode('utf-8'))
+    return md5_hash.hexdigest()
+    
+
 
 app = Flask(__name__)
 app.config['DATABASE'] = 'database.db'
@@ -22,14 +30,22 @@ def init_db():
         db.cursor().executescript(f.read())
     db.commit()
 
-@app.cli.command('initdb')
-def initdb_command():
+@app.cli.command('db_init')
+def db_init_command():
     init_db()
-    add_share("testshare", "data/testshare")
-    add_file("testshare","4","data/testshare/1.jpg")
-    add_file("testshare","5","data/testshare/2.jpg")
-    add_file("testshare","6","data/testshare/3.jpg")
     print('Initialized the database.')
+
+@app.cli.command('db_testfill')
+def db_testfill_command():
+    folder_path = "data\\testshare"
+    share_md5 = calculate_md5(folder_path)
+    add_share(share_md5, folder_path)
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            absolute_path = os.path.join(root, file)
+            md5_path = calculate_md5(absolute_path)
+            add_file(share_md5, md5_path, absolute_path)
+    print('Test share: ' + share_md5)
 
 def add_share(md5, path):
     db = get_db()
