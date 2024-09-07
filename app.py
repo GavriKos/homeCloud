@@ -7,8 +7,8 @@ app = Flask(__name__)
 def getShare(md5):
     return render_template('index.html')
 
-@app.route('/share/all/<md5>')
-def getAllfromShare(md5):
+@app.route('/share/all/<md5_share>')
+def getAllfromShare(md5_share):
     data = {}
     data["mediaList"] = []
     data["mediaList"].append(4)
@@ -16,9 +16,9 @@ def getAllfromShare(md5):
     data["mediaList"].append(6)
     return json.dumps(data)
 
-@app.route('/share/<md5>/<md52>')
-def share(md5,md52):
-    num = int(md52)-3
+@app.route('/share/<md5_share>/<md5_file>')
+def share(md5_share,md5_file):
+    num = int(md5_file)-3
     image_path = str(num)+'.jpg'
     
     return send_file(image_path, mimetype='image/jpeg')

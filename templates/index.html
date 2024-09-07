@@ -33,6 +33,7 @@
     <script>
         let currentIndex = 0;
         let mediaList = null // Список медиафайлов
+        let viewedObject = null;
 
         const paths = window
             .location
@@ -70,6 +71,11 @@
                     const url = URL.createObjectURL(data);
                     $('#media').attr('src', url);
                     $('#media-link').attr('href', url);
+
+                    if (viewedObject!= null) {
+                        URL.revokeObjectURL(viewedObject);
+                    }
+                    viewedObject = url;
                 },
                 error: function() {
                     alert('Error loading media');
