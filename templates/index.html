@@ -32,11 +32,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
     <script>
         let currentIndex = 0;
-        const mediaList = ['4', '5', '6']; // Список медиафайлов
+        let mediaList = null // Список медиафайлов
+
+        const paths = window
+            .location
+            .pathname
+            .split("/")
+            .filter(path => path !== "");
+
+        // get the last index in the array
+        const md5 = paths[paths.length - 1];
+
+
+        function loadAll() {
+            $.ajax({
+                url: '/share/all/' + md5,
+                method: 'GET',
+                success: function(data) {
+                    mediaList = JSON.parse(data)["mediaList"];
+                    loadMedia(currentIndex);
+                    currentIndex=0;
+                },
+                error: function() {
+                    alert('Error loading media');
+                }
+            });
+        }
 
         function loadMedia(index) {
             $.ajax({
-                url: '/share/' + mediaList[index],
+                url: '/share/'+md5+'/' + mediaList[index],
                 method: 'GET',
                 xhrFields: {
                     responseType: 'blob'
@@ -63,7 +88,7 @@
         });
 
         // Инициализация первого медиафайла
-        loadMedia(currentIndex);
+        loadAll();
 
         $("[data-fancybox]").fancybox({
             arrows: false,
