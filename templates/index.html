@@ -3,36 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask AJAX Example</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Media Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
+    <style>
+        .viewer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .arrow {
+            cursor: pointer;
+            font-size: 2em;
+            margin: 0 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Load Image with AJAX</h1>
-    <button id="loadImage">Load Image</button>
-    <div id="imageContainer"></div>
+    <div class="viewer">
+        <div class="arrow" id="prev">←</div>
+        <a id="media-link" data-fancybox="gallery" href="image1.jpg">
+            <img id="media" src="image1.jpg" alt="Media" style="max-width: 80vw; max-height: 80vh;">
+        </a>
+        <div class="arrow" id="next">→</div>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#loadImage').click(function() {
-                var md5 = 'your_md5_hash_here'; // Замените на нужный md5
+        let currentIndex = 0;
+        const mediaList = ['4', '5', '6']; // Список медиафайлов
 
-                $.ajax({
-                    url: '/share/' + md5,
-                    method: 'GET',
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-                    success: function(data) {
-                        var url = window.URL.createObjectURL(data);
-                        var img = $('<img>').attr('src', url);
-                        $('#imageContainer').html(img);
-                    },
-                    error: function() {
-                        alert('Error loading image');
-                    }
-                });
+        function loadMedia(index) {
+            $.ajax({
+                url: '/share/' + mediaList[index],
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(data) {
+                    const url = URL.createObjectURL(data);
+                    $('#media').attr('src', url);
+                    $('#media-link').attr('href', url);
+                },
+                error: function() {
+                    alert('Error loading media');
+                }
             });
+        }
+
+        $('#prev').click(function() {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : mediaList.length - 1;
+            loadMedia(currentIndex);
         });
+
+        $('#next').click(function() {
+            currentIndex = (currentIndex < mediaList.length - 1) ? currentIndex + 1 : 0;
+            loadMedia(currentIndex);
+        });
+
+        // Инициализация первого медиафайла
+        loadMedia(currentIndex);
+
+        $("[data-fancybox]").fancybox({
+            arrows: false,
+            infobar: true,
+            toolbar: true,
+            loop: true,
+            beforeShow: function(instance, current) {
+                instance.group.length = 3;
+            }
+            });
     </script>
 </body>
 </html>

@@ -7,10 +7,15 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/get_all_images')
+def get_all_images():
+    
+    return "{\"md5_list\":[\"1\",\"2\",\"3\"]}"
 
 @app.route('/share/<md5>')
 def share(md5):
-    image_path = '1.jpg'
+    num = int(md5)-3
+    image_path = str(num)+'.jpg'
     
     return send_file(image_path, mimetype='image/jpeg')
 
