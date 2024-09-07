@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask AJAX Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Load Image with AJAX</h1>
+    <button id="loadImage">Load Image</button>
+    <div id="imageContainer"></div>
+
+    <script>
+        $(document).ready(function() {
+            $('#loadImage').click(function() {
+                var md5 = 'your_md5_hash_here'; // Замените на нужный md5
+
+                $.ajax({
+                    url: '/share/' + md5,
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function(data) {
+                        var url = window.URL.createObjectURL(data);
+                        var img = $('<img>').attr('src', url);
+                        $('#imageContainer').html(img);
+                    },
+                    error: function() {
+                        alert('Error loading image');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
