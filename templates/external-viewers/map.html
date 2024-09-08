@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPX Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/2.1.0/gpx.min.js"></script>
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+    <script>
+        const share = "{{ share_md5 }}";
+        const file = "{{ file_md5 }}";
+        // Создаем карту и задаем начальные параметры
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Добавляем слой карты OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Загружаем и отображаем GPX файл
+        var gpx = '/share/'+share+'/'+file; // URL к вашему GPX файлу
+        new L.GPX(gpx, {
+            async: true,
+            polyline_options: {
+                color: 'red',
+                weight: 5,
+                opacity: 0.75
+            }
+        }).on('loaded', function(e) {
+            map.fitBounds(e.target.getBounds());
+        }).addTo(map);
+    </script>
+</body>
+</html>

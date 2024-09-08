@@ -65,6 +65,8 @@
 
         function loadMedia(index) {
             if (mediaList[index]["mimetype"] == "image") {
+                $('#media-link').removeAttr("data-type");
+                $('#media-link').attr('data-fancybox', "gallery");
                 $.ajax({
                     url: '/share/' + md5 + '/' + mediaList[index]["md5"],
                     method: 'GET',
@@ -89,7 +91,16 @@
             if (mediaList[index]["mimetype"] == "video") {
                 $('#media').attr('src', "/static/video_without_thumb.jpg");
                 $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').removeAttr("data-type");
+                $('#media-link').attr('data-fancybox', "gallery");
                 fancyAdaptateVideo();
+            }
+            if (mediaList[index]["mimetype"] == "maptrack") {
+                $('#media').attr('src', "/static/map_without_thumb.jpg");
+                $('#media-link').attr('href', "/external-viewer/maptrack/"+ md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').attr('data-type', "iframe");
+                $('#media-link').attr('data-fancybox', "iframe");
+                fancyAdaptateIFrameMap();
             }
         }
 
@@ -111,11 +122,14 @@
                 arrows: false,
                 infobar: true,
                 toolbar: true,
-                loop: true
+                loop: true,
+                iframe: {
+                    css: {}
+                }
             });
         }
         function fancyAdaptateVideo() {
-            $('[data-fancybox="gallery"]').fancybox({
+            $('[data-fancybox]').fancybox({
                 type: 'iframe',
                 iframe: {
                     preload: false
@@ -124,6 +138,21 @@
                 buttons: [
                     "close" // Кнопка закрытия
                 ]
+            });
+        }
+        function fancyAdaptateIFrameMap() {
+            $('[data-fancybox]').fancybox({
+                type: 'iframe',
+                backFocus: false, // Оставляем старый адрес страницы
+                buttons: [
+                    "close" // Кнопка закрытия
+                ],
+                iframe: {
+                    css: {
+                        width: '80%',
+                        height: '80%'
+                    }
+                }
             });
         }
     </script>

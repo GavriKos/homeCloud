@@ -50,6 +50,8 @@ def db_testfill_command():
                 mimeType = 'image'
             if extension == 'mp4':
                 mimeType = 'video'
+            if extension == 'gpx':
+                mimeType = 'maptrack'
             add_file(share_md5, md5_path, absolute_path, mimeType)
     print('Test share: ' + share_md5)
 
@@ -82,6 +84,11 @@ def get_share_file(sharemd5, md5):
 def getShare(md5):
     return render_template('index.html')
 
+@app.route('/external-viewer/<mimetype>/<md5_share>/<md5_file>')
+def getExternalViwer(mimetype, md5_share,md5_file):
+    if mimetype == "maptrack":
+        return render_template('external-viewers/map.html', share_md5 = md5_share, file_md5 = md5_file)
+
 @app.route('/share/all/<md5_share>')
 def getAllfromShare(md5_share):
     data = {}
@@ -104,6 +111,9 @@ def share(md5_share,md5_file):
     if mimetype == 'video':
         video_path = file['path']
         return send_file(video_path, as_attachment=False)
+    if mimetype == 'maptrack':
+        image_path = file['path']    
+        return send_file(image_path)
 
 
 if __name__ == '__main__':
