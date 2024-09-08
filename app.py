@@ -1,8 +1,10 @@
-from flask import Flask, request, send_file, render_template, g
-import sqlite3
+from flask import Flask, g, request, send_file, render_template
 import os
 import json
 import hashlib
+from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db
+
+from scripts.mimetypes import getFileByMimetype, getmimeType
 
 
 def calculate_md5(path):
@@ -14,30 +16,14 @@ def calculate_md5(path):
 app = Flask(__name__)
 app.config['DATABASE'] = 'database.db'
 
-
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(app.config['DATABASE'])
-        g.db.row_factory = sqlite3.Row
-    return g.db
-
-
 @app.teardown_appcontext
 def close_db(error):
     if 'db' in g:
         g.db.close()
 
-
-def init_db():
-    db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
-
-
 @app.cli.command('db_init')
 def db_init_command():
-    init_db()
+    init_db(app)
     print('Initialized the database.')
 
 
@@ -45,54 +31,15 @@ def db_init_command():
 def db_testfill_command():
     folder_path = "data\\testshare"
     share_md5 = calculate_md5(folder_path)
-    add_share(share_md5, folder_path)
+    add_share(app, share_md5, folder_path)
     for root, dirs, files in os.walk(folder_path):
         for file in files:
             absolute_path = os.path.join(root, file)
             md5_path = calculate_md5(absolute_path)
-            mimeType = "unknown"
             extension = absolute_path.split('.')[-1]
-            if extension == 'jpg':
-                mimeType = 'image'
-            if extension == 'mp4':
-                mimeType = 'video'
-            if extension == 'gpx':
-                mimeType = 'maptrack'
-            add_file(share_md5, md5_path, absolute_path, mimeType)
+            mimeType = getmimeType(extension)
+            add_file(app, share_md5, md5_path, absolute_path, mimeType)
     print('Test share: ' + share_md5)
-
-
-def add_share(md5, path):
-    db = get_db()
-    db.execute('INSERT INTO shares (md5, path) VALUES (?, ?)', (md5, path))
-    db.commit()
-
-
-def add_file(sharemd5, md5, path, mimeType):
-    db = get_db()
-    db.execute('INSERT INTO files (sharemd5, md5, path, mimetype) VALUES (?, ?, ?, ?)',
-               (sharemd5, md5, path, mimeType))
-    db.commit()
-
-
-def get_share(md5):
-    db = get_db()
-    share = db.execute('SELECT * FROM shares WHERE md5 = ?', (md5,)).fetchone()
-    return share
-
-
-def get_share_files(sharemd5):
-    db = get_db()
-    share = db.execute(
-        'SELECT * FROM files WHERE sharemd5 = ?', (sharemd5,)).fetchall()
-    return share
-
-
-def get_share_file(sharemd5, md5):
-    db = get_db()
-    share = db.execute(
-        'SELECT * FROM files WHERE sharemd5 = ? AND md5 = ?', (sharemd5, md5,)).fetchone()
-    return share
 
 
 @app.route('/share/<md5>')
@@ -110,7 +57,7 @@ def getExternalViwer(mimetype, md5_share, md5_file):
 def getAllfromShare(md5_share):
     data = {}
     data["mediaList"] = []
-    files = get_share_files(md5_share)
+    files = get_share_files(app, md5_share)
     for file in files:
         fileData = {}
         fileData["md5"] = file['md5']
@@ -121,18 +68,10 @@ def getAllfromShare(md5_share):
 
 @app.route('/share/<md5_share>/<md5_file>')
 def share(md5_share, md5_file):
-    file = get_share_file(md5_share, md5_file)
+    file = get_share_file(app, md5_share, md5_file)
     mimetype = file['mimetype']
-    if mimetype == 'image':
-        image_path = file['path']
-        return send_file(image_path, mimetype='image/jpeg')
-    if mimetype == 'video':
-        video_path = file['path']
-        return send_file(video_path, as_attachment=False)
-    if mimetype == 'maptrack':
-        image_path = file['path']
-        return send_file(image_path)
-
+    filepath = file['path']
+    return getFileByMimetype(mimetype, filepath)
 
 if __name__ == '__main__':
     app.run(debug=True)
