@@ -1,4 +1,5 @@
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>GPX Viewer</title>
@@ -6,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/2.1.0/gpx.min.js"></script>
 </head>
+
 <body>
     <div id="map" style="width: 100%; height: 500px;"></div>
     <script>
@@ -20,17 +22,21 @@
         }).addTo(map);
 
         // Загружаем и отображаем GPX файл
-        var gpx = '/share/'+share+'/'+file; // URL к вашему GPX файлу
+        var gpx = '/share/' + share + '/' + file; // URL к вашему GPX файлу
         new L.GPX(gpx, {
             async: true,
             polyline_options: {
                 color: 'red',
                 weight: 5,
                 opacity: 0.75
+            },
+            gpx_options: {
+                joinTrackSegments: true
             }
-        }).on('loaded', function(e) {
+        }).on('loaded', function (e) {
             map.fitBounds(e.target.getBounds());
         }).addTo(map);
     </script>
 </body>
+
 </html>

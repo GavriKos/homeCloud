@@ -97,7 +97,7 @@
             }
             if (mediaList[index]["mimetype"] == "maptrack") {
                 $('#media').attr('src', "/static/map_without_thumb.jpg");
-                $('#media-link').attr('href', "/external-viewer/maptrack/"+ md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').attr('href', "/external-viewer/maptrack/" + md5 + '/' + mediaList[index]["md5"]);
                 $('#media-link').attr('data-type', "iframe");
                 $('#media-link').attr('data-fancybox', "iframe");
                 fancyAdaptateIFrameMap();

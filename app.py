@@ -1,17 +1,19 @@
 from flask import Flask, request, send_file, render_template, g
 import sqlite3
-import os, json
+import os
+import json
 import hashlib
+
 
 def calculate_md5(path):
     md5_hash = hashlib.md5()
     md5_hash.update(path.encode('utf-8'))
     return md5_hash.hexdigest()
-    
 
 
 app = Flask(__name__)
 app.config['DATABASE'] = 'database.db'
+
 
 def get_db():
     if 'db' not in g:
@@ -19,10 +21,12 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
+
 @app.teardown_appcontext
 def close_db(error):
     if 'db' in g:
         g.db.close()
+
 
 def init_db():
     db = get_db()
@@ -30,10 +34,12 @@ def init_db():
         db.cursor().executescript(f.read())
     db.commit()
 
+
 @app.cli.command('db_init')
 def db_init_command():
     init_db()
     print('Initialized the database.')
+
 
 @app.cli.command('db_testfill')
 def db_testfill_command():
@@ -55,39 +61,50 @@ def db_testfill_command():
             add_file(share_md5, md5_path, absolute_path, mimeType)
     print('Test share: ' + share_md5)
 
+
 def add_share(md5, path):
     db = get_db()
     db.execute('INSERT INTO shares (md5, path) VALUES (?, ?)', (md5, path))
     db.commit()
 
+
 def add_file(sharemd5, md5, path, mimeType):
     db = get_db()
-    db.execute('INSERT INTO files (sharemd5, md5, path, mimetype) VALUES (?, ?, ?, ?)', (sharemd5, md5, path, mimeType))
+    db.execute('INSERT INTO files (sharemd5, md5, path, mimetype) VALUES (?, ?, ?, ?)',
+               (sharemd5, md5, path, mimeType))
     db.commit()
+
 
 def get_share(md5):
     db = get_db()
     share = db.execute('SELECT * FROM shares WHERE md5 = ?', (md5,)).fetchone()
     return share
 
+
 def get_share_files(sharemd5):
     db = get_db()
-    share = db.execute('SELECT * FROM files WHERE sharemd5 = ?', (sharemd5,)).fetchall()
+    share = db.execute(
+        'SELECT * FROM files WHERE sharemd5 = ?', (sharemd5,)).fetchall()
     return share
+
 
 def get_share_file(sharemd5, md5):
     db = get_db()
-    share = db.execute('SELECT * FROM files WHERE sharemd5 = ? AND md5 = ?', (sharemd5,md5,)).fetchone()
+    share = db.execute(
+        'SELECT * FROM files WHERE sharemd5 = ? AND md5 = ?', (sharemd5, md5,)).fetchone()
     return share
+
 
 @app.route('/share/<md5>')
 def getShare(md5):
     return render_template('index.html')
 
+
 @app.route('/external-viewer/<mimetype>/<md5_share>/<md5_file>')
-def getExternalViwer(mimetype, md5_share,md5_file):
+def getExternalViwer(mimetype, md5_share, md5_file):
     if mimetype == "maptrack":
-        return render_template('external-viewers/map.html', share_md5 = md5_share, file_md5 = md5_file)
+        return render_template('external-viewers/map.html', share_md5=md5_share, file_md5=md5_file)
+
 
 @app.route('/share/all/<md5_share>')
 def getAllfromShare(md5_share):
@@ -101,18 +118,19 @@ def getAllfromShare(md5_share):
         data["mediaList"].append(fileData)
     return json.dumps(data)
 
+
 @app.route('/share/<md5_share>/<md5_file>')
-def share(md5_share,md5_file):
+def share(md5_share, md5_file):
     file = get_share_file(md5_share, md5_file)
     mimetype = file['mimetype']
     if mimetype == 'image':
-        image_path = file['path']    
+        image_path = file['path']
         return send_file(image_path, mimetype='image/jpeg')
     if mimetype == 'video':
         video_path = file['path']
         return send_file(video_path, as_attachment=False)
     if mimetype == 'maptrack':
-        image_path = file['path']    
+        image_path = file['path']
         return send_file(image_path)
 
 
