@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             justify-content: center;
             height: 100vh;
         }
+
         .arrow {
             cursor: pointer;
             font-size: 2em;
@@ -19,6 +21,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="viewer">
         <div class="arrow" id="prev">←</div>
@@ -49,46 +52,53 @@
             $.ajax({
                 url: '/share/all/' + md5,
                 method: 'GET',
-                success: function(data) {
+                success: function (data) {
                     mediaList = JSON.parse(data)["mediaList"];
                     loadMedia(currentIndex);
-                    currentIndex=0;
+                    currentIndex = 0;
                 },
-                error: function() {
+                error: function () {
                     alert('Error loading media');
                 }
             });
         }
 
         function loadMedia(index) {
-            $.ajax({
-                url: '/share/'+md5+'/' + mediaList[index],
-                method: 'GET',
-                xhrFields: {
-                    responseType: 'blob'
-                },
-                success: function(data) {
-                    const url = URL.createObjectURL(data);
-                    $('#media').attr('src', url);
-                    $('#media-link').attr('href', url);
-
-                    if (viewedObject!= null) {
-                        URL.revokeObjectURL(viewedObject);
+            if (mediaList[index]["mimetype"] == "image") {
+                $.ajax({
+                    url: '/share/' + md5 + '/' + mediaList[index]["md5"],
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        const url = URL.createObjectURL(data);
+                        $('#media').attr('src', url);
+                        $('#media-link').attr('href', url);
+                        fancyAdaptateImage();
+                        if (viewedObject != null) {
+                            URL.revokeObjectURL(viewedObject);
+                        }
+                        viewedObject = url;
+                    },
+                    error: function () {
+                        alert('Error loading media');
                     }
-                    viewedObject = url;
-                },
-                error: function() {
-                    alert('Error loading media');
-                }
-            });
+                });
+            }
+            if (mediaList[index]["mimetype"] == "video") {
+                $('#media').attr('src', "/static/video_without_thumb.jpg");
+                $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
+                fancyAdaptateVideo();
+            }
         }
 
-        $('#prev').click(function() {
+        $('#prev').click(function () {
             currentIndex = (currentIndex > 0) ? currentIndex - 1 : mediaList.length - 1;
             loadMedia(currentIndex);
         });
 
-        $('#next').click(function() {
+        $('#next').click(function () {
             currentIndex = (currentIndex < mediaList.length - 1) ? currentIndex + 1 : 0;
             loadMedia(currentIndex);
         });
@@ -96,15 +106,27 @@
         // Инициализация первого медиафайла
         loadAll();
 
-        $("[data-fancybox]").fancybox({
-            arrows: false,
-            infobar: true,
-            toolbar: true,
-            loop: true,
-            beforeShow: function(instance, current) {
-                instance.group.length = 3;
-            }
+        function fancyAdaptateImage() {
+            $("[data-fancybox]").fancybox({
+                arrows: false,
+                infobar: true,
+                toolbar: true,
+                loop: true
             });
+        }
+        function fancyAdaptateVideo() {
+            $('[data-fancybox="gallery"]').fancybox({
+                type: 'iframe',
+                iframe: {
+                    preload: false
+                },
+                backFocus: false, // Оставляем старый адрес страницы
+                buttons: [
+                    "close" // Кнопка закрытия
+                ]
+            });
+        }
     </script>
 </body>
+
 </html>

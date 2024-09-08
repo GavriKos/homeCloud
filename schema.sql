@@ -9,5 +9,6 @@ CREATE TABLE shares (
 CREATE TABLE files (
     sharemd5 TEXT NOT NULL,
     md5 TEXT PRIMARY KEY,
-    path TEXT NOT NULL
+    path TEXT NOT NULL,
+    mimetype TEXT NOT NULL
 );

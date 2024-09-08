@@ -44,7 +44,13 @@ def db_testfill_command():
         for file in files:
             absolute_path = os.path.join(root, file)
             md5_path = calculate_md5(absolute_path)
-            add_file(share_md5, md5_path, absolute_path)
+            mimeType = "unknown"
+            extension = absolute_path.split('.')[-1]
+            if extension == 'jpg':
+                mimeType = 'image'
+            if extension == 'mp4':
+                mimeType = 'video'
+            add_file(share_md5, md5_path, absolute_path, mimeType)
     print('Test share: ' + share_md5)
 
 def add_share(md5, path):
@@ -52,9 +58,9 @@ def add_share(md5, path):
     db.execute('INSERT INTO shares (md5, path) VALUES (?, ?)', (md5, path))
     db.commit()
 
-def add_file(sharemd5, md5, path):
+def add_file(sharemd5, md5, path, mimeType):
     db = get_db()
-    db.execute('INSERT INTO files (sharemd5, md5, path) VALUES (?, ?, ?)', (sharemd5, md5, path))
+    db.execute('INSERT INTO files (sharemd5, md5, path, mimetype) VALUES (?, ?, ?, ?)', (sharemd5, md5, path, mimeType))
     db.commit()
 
 def get_share(md5):
@@ -82,15 +88,23 @@ def getAllfromShare(md5_share):
     data["mediaList"] = []
     files = get_share_files(md5_share)
     for file in files:
-        data["mediaList"].append(file['md5'])
+        fileData = {}
+        fileData["md5"] = file['md5']
+        fileData["mimetype"] = file['mimetype']
+        data["mediaList"].append(fileData)
     return json.dumps(data)
 
 @app.route('/share/<md5_share>/<md5_file>')
 def share(md5_share,md5_file):
     file = get_share_file(md5_share, md5_file)
-    image_path = file['path']
-    
-    return send_file(image_path, mimetype='image/jpeg')
+    mimetype = file['mimetype']
+    if mimetype == 'image':
+        image_path = file['path']    
+        return send_file(image_path, mimetype='image/jpeg')
+    if mimetype == 'video':
+        video_path = file['path']
+        return send_file(video_path, as_attachment=False)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
