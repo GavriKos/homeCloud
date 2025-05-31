@@ -2,7 +2,7 @@ from flask import Flask, g, request, send_file, render_template
 import os
 import json
 import hashlib
-from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db
+from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db, get_all_shares
 
 from scripts.mimetypes import getFileByMimetype, getmimeType
 
@@ -72,6 +72,12 @@ def share(md5_share, md5_file):
     mimetype = file['mimetype']
     filepath = file['path']
     return getFileByMimetype(mimetype, filepath)
+
+
+@app.route('/admin')
+def admin():
+    shares = get_all_shares(app)
+    return render_template('admin.html', shares=shares)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Shares</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .share-link { color: #007bff; text-decoration: none; }
+        .share-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Админская страница: все шары</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>MD5</th>
+                <th>Путь к папке</th>
+                <th>Ссылка</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for share in shares %}
+            <tr>
+                <td>{{ share['md5'] }}</td>
+                <td>{{ share['path'] }}</td>
+                <td><a class="share-link" href="/share/{{ share['md5'] }}" target="_blank">Открыть</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html> 

@@ -45,3 +45,9 @@ def get_share_file(app, sharemd5, md5):
     share = db.execute(
         'SELECT * FROM files WHERE sharemd5 = ? AND md5 = ?', (sharemd5, md5,)).fetchone()
     return share
+
+
+def get_all_shares(app):
+    db = get_db(app)
+    shares = db.execute('SELECT * FROM shares').fetchall()
+    return shares
