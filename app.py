@@ -51,7 +51,7 @@ def index():
 
 @app.route('/share/<md5>')
 def getShare(md5):
-    return render_template('index.html')
+    return render_template('share_view.html')
 
 
 @app.route('/external-viewer/<mimetype>/<md5_share>/<md5_file>')

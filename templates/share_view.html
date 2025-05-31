@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
+    <style>
+        .viewer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .arrow {
+            cursor: pointer;
+            font-size: 2em;
+            margin: 0 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="viewer">
+        <div class="arrow" id="prev">←</div>
+        <a id="media-link" data-fancybox="gallery" href="image1.jpg">
+            <img id="media" src="image1.jpg" alt="Media" style="max-width: 80vw; max-height: 80vh;">
+        </a>
+        <div class="arrow" id="next">→</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+    <script>
+        let currentIndex = 0;
+        let mediaList = null // Список медиафайлов
+        let viewedObject = null;
+
+        const paths = window
+            .location
+            .pathname
+            .split("/")
+            .filter(path => path !== "");
+
+        // get the last index in the array
+        const md5 = paths[paths.length - 1];
+
+
+        function loadAll() {
+            $.ajax({
+                url: '/share/all/' + md5,
+                method: 'GET',
+                success: function (data) {
+                    mediaList = JSON.parse(data)["mediaList"];
+                    loadMedia(currentIndex);
+                    currentIndex = 0;
+                },
+                error: function () {
+                    alert('Error loading media');
+                }
+            });
+        }
+
+        function loadMedia(index) {
+            if (mediaList[index]["mimetype"] == "image") {
+                $('#media-link').removeAttr("data-type");
+                $('#media-link').attr('data-fancybox', "gallery");
+                $.ajax({
+                    url: '/share/' + md5 + '/' + mediaList[index]["md5"],
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (data) {
+                        const url = URL.createObjectURL(data);
+                        $('#media').attr('src', url);
+                        $('#media-link').attr('href', url);
+                        fancyAdaptateImage();
+                        if (viewedObject != null) {
+                            URL.revokeObjectURL(viewedObject);
+                        }
+                        viewedObject = url;
+                    },
+                    error: function () {
+                        alert('Error loading media');
+                    }
+                });
+            }
+            if (mediaList[index]["mimetype"] == "video") {
+                $('#media').attr('src', "/static/video_without_thumb.jpg");
+                $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').removeAttr("data-type");
+                $('#media-link').attr('data-fancybox', "gallery");
+                fancyAdaptateVideo();
+            }
+            if (mediaList[index]["mimetype"] == "maptrack") {
+                $('#media').attr('src', "/static/map_without_thumb.jpg");
+                $('#media-link').attr('href', "/external-viewer/maptrack/" + md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').attr('data-type', "iframe");
+                $('#media-link').attr('data-fancybox', "iframe");
+                fancyAdaptateIFrameMap();
+            }
+        }
+
+        $('#prev').click(function () {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : mediaList.length - 1;
+            loadMedia(currentIndex);
+        });
+
+        $('#next').click(function () {
+            currentIndex = (currentIndex < mediaList.length - 1) ? currentIndex + 1 : 0;
+            loadMedia(currentIndex);
+        });
+
+        // Инициализация первого медиафайла
+        loadAll();
+
+        function fancyAdaptateImage() {
+            $("[data-fancybox]").fancybox({
+                arrows: false,
+                infobar: true,
+                toolbar: true,
+                loop: true,
+                iframe: {
+                    css: {}
+                }
+            });
+        }
+        function fancyAdaptateVideo() {
+            $('[data-fancybox]').fancybox({
+                type: 'iframe',
+                iframe: {
+                    preload: false
+                },
+                backFocus: false, // Оставляем старый адрес страницы
+                buttons: [
+                    "close" // Кнопка закрытия
+                ]
+            });
+        }
+        function fancyAdaptateIFrameMap() {
+            $('[data-fancybox]').fancybox({
+                type: 'iframe',
+                backFocus: false, // Оставляем старый адрес страницы
+                buttons: [
+                    "close" // Кнопка закрытия
+                ],
+                iframe: {
+                    css: {
+                        width: '80%',
+                        height: '80%'
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html> 
