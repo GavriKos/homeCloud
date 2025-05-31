@@ -1,5 +1,6 @@
 import sqlite3
 from flask import g
+from werkzeug.security import generate_password_hash, check_password_hash
 
 def get_db(app):
     if 'db' not in g:
@@ -51,3 +52,19 @@ def get_all_shares(app):
     db = get_db(app)
     shares = db.execute('SELECT * FROM shares').fetchall()
     return shares
+
+def create_admin_user(app, username, password):
+    db = get_db(app)
+    password_hash = generate_password_hash(password)
+    db.execute('INSERT INTO users (username, password_hash, is_admin) VALUES (?, ?, 1)', (username, password_hash))
+    db.commit()
+
+def get_user_by_username(app, username):
+    db = get_db(app)
+    user = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+    return user
+
+def check_admin_exists(app):
+    db = get_db(app)
+    user = db.execute('SELECT * FROM users WHERE is_admin = 1').fetchone()
+    return user is not None

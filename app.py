@@ -1,8 +1,8 @@
-from flask import Flask, g, request, send_file, render_template
+from flask import Flask, g, request, send_file, render_template, redirect, url_for, session, flash
 import os
 import json
 import hashlib
-from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db, get_all_shares
+from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db, get_all_shares, create_admin_user, get_user_by_username, check_admin_exists
 
 from scripts.mimetypes import getFileByMimetype, getmimeType
 
@@ -15,6 +15,7 @@ def calculate_md5(path):
 
 app = Flask(__name__)
 app.config['DATABASE'] = 'database.db'
+app.secret_key = 'your_secret_key_here'  # Замените на свой секретный ключ
 
 @app.teardown_appcontext
 def close_db(error):
@@ -40,6 +41,12 @@ def db_testfill_command():
             mimeType = getmimeType(extension)
             add_file(app, share_md5, md5_path, absolute_path, mimeType)
     print('Test share: ' + share_md5)
+
+
+@app.route('/')
+def index():
+    admin_exists = check_admin_exists(app)
+    return render_template('index.html', admin_exists=admin_exists)
 
 
 @app.route('/share/<md5>')
@@ -74,8 +81,43 @@ def share(md5_share, md5_file):
     return getFileByMimetype(mimetype, filepath)
 
 
+@app.route('/register_admin', methods=['GET', 'POST'])
+def register_admin():
+    if check_admin_exists(app):
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        create_admin_user(app, username, password)
+        flash('Админ создан. Войдите.')
+        return redirect(url_for('login'))
+    return render_template('register_admin.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if not check_admin_exists(app):
+        return redirect(url_for('register_admin'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = get_user_by_username(app, username)
+        if user and user['is_admin'] == 1:
+            from werkzeug.security import check_password_hash
+            if check_password_hash(user['password_hash'], password):
+                session['admin_logged_in'] = True
+                return redirect(url_for('admin'))
+        flash('Неверный логин или пароль')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('login'))
+
 @app.route('/admin')
 def admin():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
     shares = get_all_shares(app)
     return render_template('admin.html', shares=shares)
 

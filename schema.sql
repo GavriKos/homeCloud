@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS shares;
 DROP TABLE IF EXISTS files;
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE shares (
     md5 TEXT PRIMARY KEY,
@@ -11,4 +12,11 @@ CREATE TABLE files (
     md5 TEXT PRIMARY KEY,
     path TEXT NOT NULL,
     mimetype TEXT NOT NULL
+);
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    is_admin INTEGER NOT NULL DEFAULT 0
 );
