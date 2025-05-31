@@ -46,7 +46,11 @@ def db_testfill_command():
 @app.route('/')
 def index():
     admin_exists = check_admin_exists(app)
-    return render_template('index.html', admin_exists=admin_exists)
+    if not admin_exists:
+        return render_template('index.html')
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    return redirect(url_for('admin'))
 
 
 @app.route('/share/<md5>')
