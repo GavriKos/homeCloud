@@ -15,9 +15,7 @@ def calculate_md5(path):
 
 def create_app(config_name='default'):
     app = Flask(__name__)
-    # Загружаем конфигурацию
     app.config.from_object(config[config_name])
-    app.secret_key = 'your_secret_key_here'  # Замените на свой секретный ключ
 
     @app.teardown_appcontext
     def close_db(error):
@@ -147,4 +145,4 @@ def create_app(config_name='default'):
 app = create_app(os.getenv('FLASK_ENV', 'default'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=app.config['DEBUG'])
