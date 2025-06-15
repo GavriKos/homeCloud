@@ -126,6 +126,20 @@ def create_app(config_name='default'):
             return redirect(url_for('login'))
         shares = get_all_shares(app)
         return render_template('admin.html', shares=shares)
+    
+    @app.route('/config-check')
+    def config_check():
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('login'))
+        
+        config_info = {
+            'FLASK_ENV': os.getenv('FLASK_ENV'),
+            'DATABASE': app.config['DATABASE'],
+            'UPLOAD_FOLDER': app.config['UPLOAD_FOLDER'],
+            'DEBUG': app.config['DEBUG'],
+            'SECRET_KEY_SET': bool(app.config['SECRET_KEY'] != 'dev')
+        }
+        return json.dumps(config_info, indent=2)
 
     return app
 
