@@ -2,7 +2,7 @@ from flask import Flask, g, request, send_file, render_template, redirect, url_f
 import os
 import json
 import hashlib
-from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db, get_all_shares, create_admin_user, get_user_by_username, check_admin_exists
+from scripts.db import add_file, add_share, get_share_file, get_share_files, init_db, get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share
 from scripts.mimetypes import getFileByMimetype, getmimeType
 from config import config
 
@@ -138,6 +138,77 @@ def create_app(config_name='default'):
             'SECRET_KEY_SET': bool(app.config['SECRET_KEY'] != 'dev')
         }
         return json.dumps(config_info, indent=2)
+
+    @app.route('/admin/folder-tree')
+    def admin_folder_tree():
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('login'))
+        
+        def get_folder_size(path):
+            total_size = 0
+            try:
+                for entry in os.scandir(path):
+                    if entry.is_file():
+                        total_size += entry.stat().st_size
+                    elif entry.is_dir():
+                        total_size += get_folder_size(entry.path)
+            except PermissionError:
+                pass
+            return total_size
+        
+        def format_size(size):
+            for unit in ['B', 'KB', 'MB', 'GB']:
+                if size < 1024.0:
+                    return f"{size:.1f} {unit}"
+                size /= 1024.0
+            return f"{size:.1f} TB"
+        
+        def get_folder_tree(path):
+            tree = []
+            try:
+                for entry in os.scandir(path):
+                    if entry.is_dir():
+                        subtree = get_folder_tree(entry.path)
+                        folder_size = get_folder_size(entry.path)
+                        rel_path = os.path.relpath(entry.path, app.config['UPLOAD_FOLDER'])
+                        md5 = calculate_md5(entry.path)
+                        
+                        # Проверяем, расшарена ли папка
+                        is_shared = get_share(app, md5) is not None
+                        
+                        tree.append({
+                            'name': entry.name,
+                            'path': rel_path,
+                            'size': format_size(folder_size),
+                            'size_bytes': folder_size,
+                            'is_shared': is_shared,
+                            'md5': md5,
+                            'children': subtree
+                        })
+            except PermissionError:
+                pass
+            return tree
+        
+        root = app.config['UPLOAD_FOLDER']
+        return json.dumps(get_folder_tree(root), ensure_ascii=False)
+
+    @app.route('/admin/share-folder', methods=['POST'])
+    def share_folder():
+        if not session.get('admin_logged_in'):
+            return {'success': False, 'error': 'not authorized'}, 401
+        data = request.get_json()
+        rel_path = data.get('path')
+        if not rel_path:
+            return {'success': False, 'error': 'no path provided'}, 400
+        abs_path = os.path.join(app.config['UPLOAD_FOLDER'], rel_path)
+        if not os.path.isdir(abs_path):
+            return {'success': False, 'error': 'not a directory'}, 400
+        md5 = calculate_md5(abs_path)
+        try:
+            add_share(app, md5, abs_path)
+        except Exception as e:
+            return {'success': False, 'error': str(e)}, 500
+        return {'success': True}
 
     return app
 

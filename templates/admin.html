@@ -12,6 +12,26 @@
         tr:hover { background-color: #f5f5f5; }
         .share-link { color: #007bff; text-decoration: none; }
         .share-link:hover { text-decoration: underline; }
+        .folder-tree ul {
+            list-style: none;
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 1px dotted #bbb;
+        }
+        .folder-tree li {
+            cursor: pointer;
+            user-select: none;
+            margin: 2px 0;
+            position: relative;
+        }
+        .folder-icon {
+            margin-right: 6px;
+            font-size: 1.1em;
+            vertical-align: middle;
+        }
+        .collapsed > ul {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -34,5 +54,96 @@
             {% endfor %}
         </tbody>
     </table>
+    <h2>Дерево папок в UPLOAD_FOLDER</h2>
+    <div id="folder-tree" class="folder-tree"></div>
+    <script>
+    function createFolderNode(node) {
+        const li = document.createElement('li');
+        const icon = document.createElement('span');
+        icon.className = 'folder-icon';
+        icon.textContent = node.children && node.children.length > 0 ? '📁' : '📂';
+        li.appendChild(icon);
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = node.name;
+        li.appendChild(nameSpan);
+        // Размер папки
+        const sizeSpan = document.createElement('span');
+        sizeSpan.textContent = ` (${node.size})`;
+        sizeSpan.style.color = '#666';
+        sizeSpan.style.fontSize = '0.9em';
+        li.appendChild(sizeSpan);
+        // Кнопка в зависимости от статуса
+        if (node.is_shared) {
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = 'скопировать публичную ссылку';
+            copyBtn.style.marginLeft = '10px';
+            copyBtn.onclick = function(e) {
+                e.stopPropagation();
+                const url = window.location.origin + '/share/' + node.md5;
+                navigator.clipboard.writeText(url).then(() => {
+                    copyBtn.textContent = 'скопировано!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'скопировать публичную ссылку';
+                    }, 2000);
+                }).catch(() => {
+                    alert('Не удалось скопировать ссылку');
+                });
+            };
+            li.appendChild(copyBtn);
+        } else {
+            const shareBtn = document.createElement('button');
+            shareBtn.textContent = 'расшарить';
+            shareBtn.style.marginLeft = '10px';
+            shareBtn.onclick = function(e) {
+                e.stopPropagation();
+                shareBtn.disabled = true;
+                fetch('/admin/share-folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: node.path })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (res.error || 'Не удалось расшарить папку'));
+                        shareBtn.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    alert('Ошибка сети');
+                    shareBtn.disabled = false;
+                });
+            };
+            li.appendChild(shareBtn);
+        }
+        if (node.children && node.children.length > 0) {
+            li.classList.add('collapsed');
+            li.addEventListener('click', function(e) {
+                e.stopPropagation();
+                li.classList.toggle('collapsed');
+                icon.textContent = li.classList.contains('collapsed') ? '📁' : '📂';
+            });
+            const ul = document.createElement('ul');
+            for (const child of node.children) {
+                ul.appendChild(createFolderNode(child));
+            }
+            li.appendChild(ul);
+        }
+        return li;
+    }
+
+    fetch('/admin/folder-tree')
+        .then(r => r.json())
+        .then(tree => {
+            const container = document.getElementById('folder-tree');
+            const ul = document.createElement('ul');
+            for (const node of tree) {
+                ul.appendChild(createFolderNode(node));
+            }
+            container.appendChild(ul);
+        });
+    </script>
 </body>
 </html> 
