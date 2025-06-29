@@ -4,3 +4,4 @@ data/
 *.pyc
 database.db
 .env
+_pycache_
