@@ -34,10 +34,18 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container">
     <a class="navbar-brand" href="/">HomeCloud</a>
+    <div class="ms-auto">
+      <div class="btn-group">
+        <a href="/set-lang/en" class="btn btn-sm btn-light{% if get_locale() == 'en' %} active{% endif %}">EN</a>
+        <a href="/set-lang/ru" class="btn btn-sm btn-light{% if get_locale() == 'ru' %} active{% endif %}">RU</a>
+      </div>
+    </div>
   </div>
 </nav>
 <div class="container mb-5">
-    {% block content %}{% endblock %}
+    {% block layout %}
+        {% block content %}{% endblock %}
+    {% endblock %}
 </div>
 {% block scripts %}{% endblock %}
 </body>

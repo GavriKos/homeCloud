@@ -1,4 +1,4 @@
-from flask import Flask, g, request, send_file, render_template, redirect, url_for, session, flash
+from flask import Flask, g, request, send_file, render_template, redirect, url_for, session, flash, make_response
 import os
 import json
 import hashlib
@@ -6,16 +6,43 @@ from scripts.db import add_file, add_share, get_share_file, get_share_files, ini
 from scripts.mimetypes import getFileByMimetype, getmimeType
 from config import config
 
+# --- Локализация ---
+with open('locales.json', encoding='utf-8') as f:
+    LOCALES = json.load(f)
+SUPPORTED_LANGS = ['en', 'ru']
+DEFAULT_LANG = 'en'
+
+def get_locale():
+    lang = session.get('lang')
+    if lang in SUPPORTED_LANGS:
+        return lang
+    return DEFAULT_LANG
+
+def _(key):
+    lang = get_locale()
+    return LOCALES.get(lang, {}).get(key, key)
 
 def calculate_md5(path):
     md5_hash = hashlib.md5()
     md5_hash.update(path.encode('utf-8'))
     return md5_hash.hexdigest()
 
-
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
+
+    # Делаем _ доступной во всех шаблонах
+    @app.context_processor
+    def inject_translator():
+        return {'_': _, 'get_locale': get_locale}
+
+    @app.route('/set-lang/<lang>')
+    def set_lang(lang):
+        if lang not in SUPPORTED_LANGS:
+            lang = DEFAULT_LANG
+        session['lang'] = lang
+        resp = make_response(redirect(request.referrer or url_for('index')))
+        return resp
 
     @app.teardown_appcontext
     def close_db(error):
@@ -119,11 +146,21 @@ def create_app(config_name='default'):
         return redirect(url_for('login'))
 
     @app.route('/admin')
-    def admin():
+    def admin_redirect():
+        return redirect(url_for('admin_folders'))
+
+    @app.route('/admin/folders')
+    def admin_folders():
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('login'))
+        return render_template('admin_folders.html')
+
+    @app.route('/admin/shares')
+    def admin_shares():
         if not session.get('admin_logged_in'):
             return redirect(url_for('login'))
         shares = get_all_shares(app)
-        return render_template('admin.html', shares=shares)
+        return render_template('admin_shares.html', shares=shares)
     
     @app.route('/config-check')
     def config_check():

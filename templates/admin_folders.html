@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
 {% block title %}Дерево папок — HomeCloud{% endblock %}
-{% block sidebar %}
-<div class="list-group">
-  <a href="/admin/folders" class="list-group-item list-group-item-action active">Дерево папок</a>
-  <a href="/admin/shares" class="list-group-item list-group-item-action">Список шар</a>
+{% block layout %}
+<div class="row">
+  <div class="col-md-3 mb-4">
+    {% block sidebar %}
+      {% include 'admin_sidebar.html' %}
+    {% endblock %}
+  </div>
+  <div class="col-md-9">
+    {% block content %}
+    <h2 class="mb-3">{{ _('folder_tree') }}</h2>
+    <div id="folder-tree" class="folder-tree"></div>
+    {% endblock %}
+  </div>
 </div>
-{% endblock %}
-{% block content %}
-<h2 class="mb-3">Дерево папок в UPLOAD_FOLDER</h2>
-<div id="folder-tree" class="folder-tree"></div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -30,15 +35,15 @@ function createFolderNode(node) {
     // Кнопка в зависимости от статуса
     if (node.is_shared) {
         const copyBtn = document.createElement('button');
-        copyBtn.textContent = 'скопировать публичную ссылку';
+        copyBtn.textContent = "{{ _('copy_public_link') }}";
         copyBtn.className = 'btn btn-sm btn-outline-secondary ms-2';
         copyBtn.onclick = function(e) {
             e.stopPropagation();
             const url = window.location.origin + '/share/' + node.md5;
             navigator.clipboard.writeText(url).then(() => {
-                copyBtn.textContent = 'скопировано!';
+                copyBtn.textContent = "{{ _('copied') }}";
                 setTimeout(() => {
-                    copyBtn.textContent = 'скопировать публичную ссылку';
+                    copyBtn.textContent = "{{ _('copy_public_link') }}";
                 }, 2000);
             }).catch(() => {
                 alert('Не удалось скопировать ссылку');
@@ -47,7 +52,7 @@ function createFolderNode(node) {
         li.appendChild(copyBtn);
     } else {
         const shareBtn = document.createElement('button');
-        shareBtn.textContent = 'расшарить';
+        shareBtn.textContent = "{{ _('share') }}";
         shareBtn.className = 'btn btn-sm btn-primary ms-2';
         shareBtn.onclick = function(e) {
             e.stopPropagation();

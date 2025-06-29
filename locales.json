@@ -1,0 +1,42 @@
+{
+  "en": {
+    "admin_page_title": "Admin page: all shares",
+    "folder_tree": "Folder tree in UPLOAD_FOLDER",
+    "share": "Share",
+    "copy_public_link": "Copy public link",
+    "copied": "Copied!",
+    "open": "Open",
+    "login": "Login",
+    "password": "Password",
+    "login_admin": "Admin login",
+    "create_admin": "Create admin",
+    "welcome": "Welcome to HomeCloud",
+    "start_create_admin": "To get started, create an administrator.",
+    "list_of_shares": "List of all shares",
+    "folder_tree_menu": "Folder tree",
+    "shares_menu": "Shares list",
+    "folder_path": "Folder Path",
+    "md5": "MD5",
+    "link": "Link"  
+  },
+  "ru": {
+    "admin_page_title": "Админская страница: все шары",
+    "folder_tree": "Дерево папок в UPLOAD_FOLDER",
+    "share": "расшарить",
+    "copy_public_link": "скопировать публичную ссылку",
+    "copied": "скопировано!",
+    "open": "Открыть",
+    "login": "Логин",
+    "password": "Пароль",
+    "login_admin": "Вход администратора",
+    "create_admin": "Создать администратора",
+    "welcome": "Добро пожаловать в HomeCloud",
+    "start_create_admin": "Для начала работы создайте администратора.",
+    "list_of_shares": "Список всех шар",
+    "folder_tree_menu": "Дерево папок",
+    "shares_menu": "Список шар",
+    "folder_path": "Путь",
+    "md5": "MD5",
+    "link": "Ссылка"
+  }
+} 

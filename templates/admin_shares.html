@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Список шар — HomeCloud{% endblock %}
+{% block layout %}
+<div class="row">
+  <div class="col-md-3 mb-4">
+    {% block sidebar %}
+      {% include 'admin_sidebar.html' %}
+    {% endblock %}
+  </div>
+  <div class="col-md-9">
+    {% block content %}
+    <h2 class="mb-4">Список всех шар</h2>
+    <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>{{ _('md5') }}</th>
+                <th>{{ _('folder_path') }}</th>
+                <th>{{ _('link') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for share in shares %}
+            <tr>
+                <td class="text-monospace small">{{ share['md5'] }}</td>
+                <td>{{ share['path'] }}</td>
+                <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">Открыть</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% endblock %}
+  </div>
+</div>
+{% endblock %} 
