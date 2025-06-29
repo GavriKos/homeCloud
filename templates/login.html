@@ -1,32 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход администратора</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .center { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
-        .form { display: flex; flex-direction: column; width: 300px; }
-        .form input { margin-bottom: 15px; padding: 8px; font-size: 1em; }
-        .btn { padding: 10px 20px; background: #007bff; color: #fff; border: none; border-radius: 4px; text-decoration: none; }
-        .btn:hover { background: #0056b3; }
-        .flash { color: red; margin-bottom: 10px; }
-    </style>
-</head>
-<body>
-    <div class="center">
-        <h2>Вход администратора</h2>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <div class="flash">{{ messages[0] }}</div>
-          {% endif %}
-        {% endwith %}
-        <form class="form" method="post">
-            <input type="text" name="username" placeholder="Логин" required>
-            <input type="password" name="password" placeholder="Пароль" required>
-            <button class="btn" type="submit">Войти</button>
-        </form>
+{% extends 'base.html' %}
+{% block title %}Вход администратора — HomeCloud{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm p-4 mt-5">
+      <h2 class="mb-4 text-center">Вход администратора</h2>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="alert alert-danger">{{ messages[0] }}</div>
+        {% endif %}
+      {% endwith %}
+      <form method="post">
+        <div class="mb-3">
+          <input type="text" name="username" class="form-control" placeholder="Логин" required>
+        </div>
+        <div class="mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Войти</button>
+      </form>
     </div>
-</body>
-</html> 
+  </div>
+</div>
+{% endblock %} 
