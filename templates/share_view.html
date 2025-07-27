@@ -32,11 +32,23 @@
             font-size: 2.5rem;
             color: #0d6efd;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: color 0.2s, background 0.2s;
             user-select: none;
+            border-radius: 50%;
+            padding: 0.3em 0.5em;
+            background: rgba(13,110,253,0.07);
+            border: none;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .media-arrow:active, .media-arrow:focus {
+            background: rgba(13,110,253,0.18);
         }
         .media-arrow:hover {
             color: #0a58ca;
+            background: rgba(13,110,253,0.18);
         }
         .media-img {
             max-width: 80vw;
@@ -52,11 +64,35 @@
         }
         @media (max-width: 600px) {
             .media-viewer-card {
-                padding: 1rem 0.5rem;
+                padding: 0.5rem 0.2rem;
+                max-width: 100vw;
+                margin: 0;
             }
             .media-img {
                 max-width: 98vw;
-                max-height: 40vh;
+                max-height: 38vh;
+            }
+            .media-controls {
+                gap: 1.2rem;
+                margin-bottom: 0.7rem;
+                order: 2;
+            }
+            .media-arrow {
+                font-size: 3.2rem;
+                padding: 0.5em 0.7em;
+                background: rgba(13,110,253,0.13);
+            }
+            .media-info {
+                font-size: 1rem;
+                margin-top: 0.7rem;
+            }
+        }
+        /* На мобильных кнопки под изображением */
+        @media (max-width: 600px) {
+            .media-controls {
+                flex-direction: row;
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -69,11 +105,11 @@
 </nav>
 <div class="container">
     <div class="media-viewer-card">
+        <a id="media-link" data-fancybox="gallery" href="image1.jpg">
+            <img id="media" src="image1.jpg" alt="Media" class="media-img">
+        </a>
         <div class="media-controls mb-3">
             <span class="media-arrow" id="prev" title="Предыдущее"><i class="bi bi-arrow-left-circle"></i>←</span>
-            <a id="media-link" data-fancybox="gallery" href="image1.jpg">
-                <img id="media" src="image1.jpg" alt="Media" class="media-img">
-            </a>
             <span class="media-arrow" id="next" title="Следующее"><i class="bi bi-arrow-right-circle"></i>→</span>
         </div>
         <div class="media-info text-center">
@@ -174,7 +210,22 @@
             infobar: true,
             toolbar: true,
             loop: true,
-            iframe: { css: {} }
+            iframe: { css: {} },
+            // closeClickOutside: true // Не работает, поэтому ниже кастомный обработчик
+            afterShow: function(instance, current) {
+                // Снимаем предыдущий обработчик, если был
+                $(document).off('mousedown.fancybox-close');
+                // Вешаем новый
+                $('.fancybox-bg').on('mousedown.fancybox-close', function(e) {
+                    // Проверяем, что клик был именно по overlay, а не по картинке
+                    if ($(e.target).hasClass('fancybox-bg')) {
+                        $.fancybox.close();
+                    }
+                });
+            },
+            afterClose: function() {
+                $('.fancybox-bg').off('mousedown.fancybox-close');
+            }
         });
     }
     function fancyAdaptateVideo() {
