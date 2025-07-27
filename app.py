@@ -77,7 +77,7 @@ def create_app(config_name='default'):
             return render_template('index.html')
         if not session.get('admin_logged_in'):
             return redirect(url_for('login'))
-        return redirect(url_for('admin'))
+        return redirect(url_for('admin_folders'))
 
 
     @app.route('/share/<md5>')
