@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Список шар — HomeCloud{% endblock %}
+{% block title %}{{ _('list_of_shares') }} — HomeCloud{% endblock %}
 {% block layout %}
 <div class="row">
   <div class="col-md-3 mb-4">
@@ -9,7 +9,7 @@
   </div>
   <div class="col-md-9">
     {% block content %}
-    <h2 class="mb-4">Список всех шар</h2>
+    <h2 class="mb-4">{{ _('list_of_shares') }}</h2>
     <div class="table-responsive">
     <table class="table table-bordered table-hover align-middle bg-white">
         <thead class="table-light">
@@ -24,7 +24,7 @@
             <tr>
                 <td class="text-monospace small">{{ share['md5'] }}</td>
                 <td>{{ share['path'] }}</td>
-                <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">Открыть</a></td>
+                <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">{{ _('open') }}</a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -33,4 +33,4 @@
     {% endblock %}
   </div>
 </div>
-{% endblock %} 
+{% endblock %}

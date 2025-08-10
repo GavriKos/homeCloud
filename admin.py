@@ -9,7 +9,7 @@ from flask import Blueprint, request, render_template, redirect, url_for, sessio
 from werkzeug.security import check_password_hash
 
 from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share
-from helpers import calculate_md5, get_folder_size, format_size
+from helpers import calculate_md5, get_folder_size, format_size, _
 
 # Create blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
@@ -31,7 +31,7 @@ def register_admin():
         username = request.form['username']
         password = request.form['password']
         create_admin_user(current_app, username, password)
-        flash('Админ создан. Войдите.')
+        flash(_('admin_created_please_login'))
         return redirect(url_for('admin.login'))
     
     return render_template('register_admin.html')
@@ -59,7 +59,7 @@ def login():
                 session['admin_logged_in'] = True
                 return redirect(url_for('admin.admin_folders'))
 
-        flash('Неверный логин или пароль')
+        flash(_('invalid_login_or_password'))
 
     return render_template('login.html')
 

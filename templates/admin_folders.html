@@ -26,13 +26,13 @@ function createFolderNode(node) {
     const nameSpan = document.createElement('span');
     nameSpan.textContent = node.name;
     li.appendChild(nameSpan);
-    // Размер папки
+    // Folder size display
     const sizeSpan = document.createElement('span');
     sizeSpan.textContent = ` (${node.size})`;
     sizeSpan.style.color = '#666';
     sizeSpan.style.fontSize = '0.9em';
     li.appendChild(sizeSpan);
-    // Кнопка в зависимости от статуса
+    // Button based on sharing status
     if (node.is_shared) {
         const copyBtn = document.createElement('button');
         copyBtn.textContent = "{{ _('copy_public_link') }}";

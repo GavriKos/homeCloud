@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Вход администратора — HomeCloud{% endblock %}
+{% block title %}{{ _('login_admin') }} — HomeCloud{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-5 col-lg-4">
     <div class="card shadow-sm p-4 mt-5">
-      <h2 class="mb-4 text-center">Вход администратора</h2>
+      <h2 class="mb-4 text-center">{{ _('login_admin') }}</h2>
       {% with messages = get_flashed_messages() %}
         {% if messages %}
           <div class="alert alert-danger">{{ messages[0] }}</div>
@@ -12,14 +12,14 @@
       {% endwith %}
       <form method="post">
         <div class="mb-3">
-          <input type="text" name="username" class="form-control" placeholder="Логин" required>
+          <input type="text" name="username" class="form-control" placeholder="{{ _('login') }}" required>
         </div>
         <div class="mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Пароль" required>
+          <input type="password" name="password" class="form-control" placeholder="{{ _('password') }}" required>
         </div>
-        <button class="btn btn-primary w-100" type="submit">Войти</button>
+        <button class="btn btn-primary w-100" type="submit">{{ _('login_button') }}</button>
       </form>
     </div>
   </div>
 </div>
-{% endblock %} 
+{% endblock %}

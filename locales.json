@@ -17,7 +17,19 @@
     "shares_menu": "Shares list",
     "folder_path": "Folder Path",
     "md5": "MD5",
-    "link": "Link"  
+    "link": "Link",
+    "admin_created_please_login": "Admin created. Please login.",
+    "invalid_login_or_password": "Invalid login or password",
+    "folder_size": "Folder size",
+    "share_button": "Share",
+    "copy_link_failed": "Failed to copy link",
+    "start": "Start",
+    "login_button": "Login",
+    "create_button": "Create",
+    "file_viewer": "File Viewer",
+    "previous": "Previous",
+    "next": "Next",
+    "media_load_error": "Error loading media"
   },
   "ru": {
     "admin_page_title": "Админская страница: все шары",
@@ -37,6 +49,18 @@
     "shares_menu": "Список шар",
     "folder_path": "Путь",
     "md5": "MD5",
-    "link": "Ссылка"
+    "link": "Ссылка",
+    "admin_created_please_login": "Админ создан. Войдите.",
+    "invalid_login_or_password": "Неверный логин или пароль",
+    "folder_size": "Размер папки",
+    "share_button": "расшарить",
+    "copy_link_failed": "Не удалось скопировать ссылку",
+    "start": "Старт",
+    "login_button": "Войти",
+    "create_button": "Создать",
+    "file_viewer": "Просмотр файлов",
+    "previous": "Предыдущее",
+    "next": "Следующее",
+    "media_load_error": "Ошибка загрузки медиа"
   }
 } 

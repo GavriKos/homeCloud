@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Просмотр файлов — HomeCloud</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends 'base.html' %}
+{% block title %}{{ _('file_viewer') }} — HomeCloud{% endblock %}
+{% block head %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
@@ -98,7 +94,7 @@
                 order: 9;
             }
         }
-        /* На мобильных кнопки под изображением */
+        /* Mobile buttons under image */
         @media (max-width: 600px) {
             .media-controls {
                 flex-direction: row;
@@ -107,27 +103,22 @@
             }
         }
     </style>
-</head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="/">HomeCloud</a>
-  </div>
-</nav>
-<div class="container">
-    <div class="media-viewer-card">
-        <a id="media-link" data-fancybox="gallery" href="image1.jpg">
-            <img id="media" src="image1.jpg" alt="Media" class="media-img">
-        </a>
-        <div class="media-info text-center">
-            <span id="media-counter">1 / 1</span>
-        </div>
-        <div class="media-controls mb-3">
-            <span class="media-arrow" id="prev" title="Предыдущее"><i class="bi bi-chevron-left"></i></span>
-            <span class="media-arrow" id="next" title="Следующее"><i class="bi bi-chevron-right"></i></span>
-        </div>
+{% endblock %}
+{% block content %}
+<div class="media-viewer-card">
+    <a id="media-link" data-fancybox="gallery" href="image1.jpg">
+        <img id="media" src="image1.jpg" alt="Media" class="media-img">
+    </a>
+    <div class="media-info text-center">
+        <span id="media-counter">1 / 1</span>
+    </div>
+    <div class="media-controls mb-3">
+        <span class="media-arrow" id="prev" title="{{ _('previous') }}"><i class="bi bi-chevron-left"></i></span>
+        <span class="media-arrow" id="next" title="{{ _('next') }}"><i class="bi bi-chevron-right"></i></span>
     </div>
 </div>
+{% endblock %}
+{% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 <script>
@@ -154,7 +145,7 @@
                 updateCounter();
             },
             error: function () {
-                alert('Ошибка загрузки медиа');
+                alert('{{ _("media_load_error") }}');
             }
         });
     }
@@ -180,7 +171,7 @@
                     viewedObject = url;
                 },
                 error: function () {
-                    alert('Ошибка загрузки медиа');
+                    alert('{{ _("media_load_error") }}');
                 }
             });
         }
@@ -221,13 +212,13 @@
             toolbar: true,
             loop: true,
             iframe: { css: {} },
-            // closeClickOutside: true // Не работает, поэтому ниже кастомный обработчик
+            // closeClickOutside: true // Doesn't work, so custom handler below
             afterShow: function(instance, current) {
-                // Снимаем предыдущий обработчик, если был
+                // Remove previous handler if exists
                 $(document).off('mousedown.fancybox-close');
-                // Вешаем новый
+                // Add new handler
                 $('.fancybox-bg').on('mousedown.fancybox-close', function(e) {
-                    // Проверяем, что клик был именно по overlay, а не по картинке
+                    // Check that click was on overlay, not on image
                     if ($(e.target).hasClass('fancybox-bg')) {
                         $.fancybox.close();
                     }
