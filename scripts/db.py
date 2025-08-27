@@ -178,3 +178,30 @@ def check_admin_exists(app):
     db = get_db(app)
     user = db.execute('SELECT * FROM users WHERE is_admin = 1').fetchone()
     return user is not None
+
+
+def delete_share_files(app, sharemd5):
+    """
+    Delete all files belonging to a share from the database.
+
+    Args:
+        app: Flask application instance
+        sharemd5 (str): MD5 hash of the share
+    """
+    db = get_db(app)
+    db.execute('DELETE FROM files WHERE sharemd5 = ?', (sharemd5,))
+    db.commit()
+
+
+def delete_share(app, sharemd5):
+    """
+    Delete a share and all its files from the database.
+
+    Args:
+        app: Flask application instance
+        sharemd5 (str): MD5 hash of the share
+    """
+    db = get_db(app)
+    db.execute('DELETE FROM files WHERE sharemd5 = ?', (sharemd5,))
+    db.execute('DELETE FROM shares WHERE md5 = ?', (sharemd5,))
+    db.commit()

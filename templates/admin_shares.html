@@ -10,6 +10,13 @@
   <div class="col-md-9">
     {% block content %}
     <h2 class="mb-4">{{ _('list_of_shares') }}</h2>
+
+    <!-- Global actions -->
+    <div class="mb-3">
+        <button id="checkAllBtn" class="btn btn-info me-2">{{ _('check_all_integrity') }}</button>
+        <button id="reindexAllBtn" class="btn btn-warning">{{ _('reindex_all') }}</button>
+    </div>
+
     <div class="table-responsive">
     <table class="table table-bordered table-hover align-middle bg-white">
         <thead class="table-light">
@@ -17,6 +24,7 @@
                 <th>{{ _('md5') }}</th>
                 <th>{{ _('folder_path') }}</th>
                 <th>{{ _('link') }}</th>
+                <th>{{ _('actions') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +33,10 @@
                 <td class="text-monospace small">{{ share['md5'] }}</td>
                 <td>{{ share['path'] }}</td>
                 <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">{{ _('open') }}</a></td>
+                <td>
+                    <button class="btn btn-sm btn-info me-1 check-integrity-btn" data-share-md5="{{ share['md5'] }}">{{ _('check_integrity') }}</button>
+                    <button class="btn btn-sm btn-warning reindex-btn" data-share-md5="{{ share['md5'] }}">{{ _('reindex') }}</button>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -33,4 +45,220 @@
     {% endblock %}
   </div>
 </div>
+
+<!-- Modal for displaying results -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resultModalTitle">{{ _('integrity_check_result') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="resultModalBody">
+                <!-- Results will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check integrity for individual share
+    document.querySelectorAll('.check-integrity-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const shareMd5 = this.dataset.shareMd5;
+            this.disabled = true;
+            this.textContent = '...';
+
+            fetch(`/admin/check-integrity/${shareMd5}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showIntegrityResult(data, false);
+                    } else {
+                        alert('{{ _("error") }}: ' + (data.error || '{{ _("unknown_error") }}'));
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('{{ _("network_error") }}');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.textContent = '{{ _("check_integrity") }}';
+                });
+        });
+    });
+
+    // Reindex individual share
+    document.querySelectorAll('.reindex-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('{{ _("confirm_reindex") }}')) return;
+
+            const shareMd5 = this.dataset.shareMd5;
+            this.disabled = true;
+            this.textContent = '...';
+
+            fetch(`/admin/reindex/${shareMd5}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showReindexResult(data, false);
+                    } else {
+                        alert('{{ _("error") }}: ' + (data.error || '{{ _("unknown_error") }}'));
+                    }
+                })
+                .catch(error => {
+                    alert('{{ _("network_error") }}');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.textContent = '{{ _("reindex") }}';
+                });
+        });
+    });
+
+    // Check all integrity
+    document.getElementById('checkAllBtn').addEventListener('click', function() {
+        this.disabled = true;
+        this.textContent = '...';
+
+        fetch('/admin/check-all-integrity')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showIntegrityResult(data, true);
+                } else {
+                    alert('{{ _("error") }}: ' + (data.error || '{{ _("unknown_error") }}'));
+                }
+            })
+            .catch(error => {
+                alert('{{ _("network_error") }}');
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.textContent = '{{ _("check_all_integrity") }}';
+            });
+    });
+
+    // Reindex all
+    document.getElementById('reindexAllBtn').addEventListener('click', function() {
+        if (!confirm('{{ _("confirm_reindex_all") }}')) return;
+
+        this.disabled = true;
+        this.textContent = '...';
+
+        fetch('/admin/reindex-all', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showReindexResult(data, true);
+                } else {
+                    alert('{{ _("error") }}: ' + (data.error || '{{ _("unknown_error") }}'));
+                }
+            })
+            .catch(error => {
+                alert('{{ _("network_error") }}');
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.textContent = '{{ _("reindex_all") }}';
+            });
+    });
+
+    function showIntegrityResult(data, isAll) {
+        let html = '';
+
+        if (isAll) {
+            html += `<div class="mb-3">
+                <h6>{{ _('summary') }}</h6>
+                <p><strong>{{ _('total_shares') }}:</strong> ${data.total_shares}</p>
+                <p><strong>{{ _('total_missing_files') }}:</strong> ${data.total_missing_files}</p>
+                <p><strong>{{ _('total_extra_files') }}:</strong> ${data.total_extra_files}</p>
+                <p><strong>{{ _('status') }}:</strong>
+                    <span class="badge ${data.all_ok ? 'bg-success' : 'bg-warning'}">
+                        ${data.all_ok ? '{{ _("integrity_ok") }}' : '{{ _("issues_found") }}'}
+                    </span>
+                </p>
+            </div>`;
+
+            if (data.shares && data.shares.length > 0) {
+                html += '<h6>{{ _("details_by_share") }}</h6>';
+                data.shares.forEach(share => {
+                    html += `<div class="border p-2 mb-2">
+                        <p><strong>{{ _('path') }}:</strong> ${share.path}</p>`;
+                    if (share.error) {
+                        html += `<p class="text-danger"><strong>{{ _('error') }}:</strong> ${share.error}</p>`;
+                    } else {
+                        html += `<p><strong>{{ _('files_in_db') }}:</strong> ${share.files_in_db}</p>
+                                <p><strong>{{ _('files_on_disk') }}:</strong> ${share.files_on_disk}</p>
+                                <p><strong>{{ _('missing_files') }}:</strong> ${share.missing_files}</p>
+                                <p><strong>{{ _('extra_files') }}:</strong> ${share.extra_files}</p>
+                                <p><strong>{{ _('status') }}:</strong>
+                                    <span class="badge ${share.is_ok ? 'bg-success' : 'bg-warning'}">
+                                        ${share.is_ok ? '{{ _("integrity_ok") }}' : '{{ _("issues_found") }}'}
+                                    </span>
+                                </p>`;
+                    }
+                    html += '</div>';
+                });
+            }
+        } else {
+            html += `<p><strong>{{ _('share_path') }}:</strong> ${data.share_path}</p>
+                    <p><strong>{{ _('files_in_db') }}:</strong> ${data.files_in_db}</p>
+                    <p><strong>{{ _('files_on_disk') }}:</strong> ${data.files_on_disk}</p>
+                    <p><strong>{{ _('missing_files') }}:</strong> ${data.missing_files}</p>
+                    <p><strong>{{ _('extra_files') }}:</strong> ${data.extra_files}</p>
+                    <p><strong>{{ _('status') }}:</strong>
+                        <span class="badge ${data.is_ok ? 'bg-success' : 'bg-warning'}">
+                            ${data.is_ok ? '{{ _("integrity_ok") }}' : '{{ _("issues_found") }}'}
+                        </span>
+                    </p>`;
+        }
+
+        document.getElementById('resultModalTitle').textContent = '{{ _("integrity_check_result") }}';
+        document.getElementById('resultModalBody').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('resultModal')).show();
+    }
+
+    function showReindexResult(data, isAll) {
+        let html = '';
+
+        if (isAll) {
+            html += `<div class="mb-3">
+                <h6>{{ _('summary') }}</h6>
+                <p><strong>{{ _('total_shares') }}:</strong> ${data.total_shares}</p>
+                <p><strong>{{ _('total_files_removed') }}:</strong> ${data.total_files_removed}</p>
+                <p><strong>{{ _('total_files_added') }}:</strong> ${data.total_files_added}</p>
+            </div>`;
+
+            if (data.shares && data.shares.length > 0) {
+                html += '<h6>{{ _("details_by_share") }}</h6>';
+                data.shares.forEach(share => {
+                    html += `<div class="border p-2 mb-2">
+                        <p><strong>{{ _('path') }}:</strong> ${share.path}</p>`;
+                    if (share.error) {
+                        html += `<p class="text-danger"><strong>{{ _('error') }}:</strong> ${share.error}</p>`;
+                    } else {
+                        html += `<p><strong>{{ _('files_removed') }}:</strong> ${share.files_removed}</p>
+                                <p><strong>{{ _('files_added') }}:</strong> ${share.files_added}</p>`;
+                    }
+                    html += '</div>';
+                });
+            }
+        } else {
+            html += `<p><strong>{{ _('share_path') }}:</strong> ${data.share_path}</p>
+                    <p><strong>{{ _('files_removed') }}:</strong> ${data.files_removed}</p>
+                    <p><strong>{{ _('files_added') }}:</strong> ${data.files_added}</p>`;
+        }
+
+        document.getElementById('resultModalTitle').textContent = '{{ _("reindex_complete") }}';
+        document.getElementById('resultModalBody').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('resultModal')).show();
+    }
+});
+</script>
 {% endblock %}
