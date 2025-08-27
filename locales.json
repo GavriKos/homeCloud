@@ -60,7 +60,8 @@
     "issues_found": "Issues found",
     "details_by_share": "Details by share",
     "path": "Path",
-    "share_path": "Share path"
+    "share_path": "Share path",
+    "unknown_content": "Unknown content type"
   },
   "ru": {
     "admin_page_title": "Админская страница: все шары",
@@ -123,6 +124,7 @@
     "issues_found": "Найдены проблемы",
     "details_by_share": "Детали по шарам",
     "path": "Путь",
-    "share_path": "Путь шары"
+    "share_path": "Путь шары",
+    "unknown_content": "Неизвестный тип содержимого"
   }
 } 

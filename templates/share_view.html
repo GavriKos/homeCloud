@@ -174,20 +174,45 @@
                     alert('{{ _("media_load_error") }}');
                 }
             });
-        }
+        } else
         if (mediaList[index]["mimetype"] == "video") {
             $('#media').attr('src', "/static/video_without_thumb.jpg");
             $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
             $('#media-link').removeAttr("data-type");
             $('#media-link').attr('data-fancybox', "gallery");
             fancyAdaptateVideo();
-        }
+        } else
         if (mediaList[index]["mimetype"] == "maptrack") {
             $('#media').attr('src', "/static/map_without_thumb.jpg");
             $('#media-link').attr('href', "/external-viewer/maptrack/" + md5 + '/' + mediaList[index]["md5"]);
             $('#media-link').attr('data-type', "iframe");
             $('#media-link').attr('data-fancybox', "iframe");
             fancyAdaptateIFrameMap();
+        }
+        else {
+            // Clear any previous fancybox settings
+            $('#media-link').removeAttr("data-fancybox");
+            $('#media-link').removeAttr("data-type");
+            $('#media-link').removeAttr("href");
+
+            // Show unknown content message
+            $('#media').attr('src', 'data:image/svg+xml;base64,' + btoa(`
+                <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+                    <rect width="400" height="300" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+                    <text x="200" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6c757d">
+                        {{ _("unknown_content") }}
+                    </text>
+                    <text x="200" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#adb5bd">
+                        MIME: ${mediaList[index]["mimetype"] || "unknown"}
+                    </text>
+                </svg>
+            `));
+
+            // Disable fancybox for unknown content
+            $('#media-link').off('click').on('click', function(e) {
+                e.preventDefault();
+                return false;
+            });
         }
     }
 
