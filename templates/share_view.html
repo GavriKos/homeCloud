@@ -119,7 +119,6 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 <script>
     let currentIndex = 0;
@@ -151,6 +150,7 @@
     }
 
     function loadMedia(index) {
+        console.log(mediaList);
         if (!mediaList || !mediaList[index]) return;
         updateCounter();
         if (mediaList[index]["mimetype"] == "image") {
@@ -246,5 +246,4 @@
         });
     }
 </script>
-</body>
-</html> 
+{% endblock %}

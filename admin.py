@@ -8,8 +8,11 @@ import json
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash, current_app
 from werkzeug.security import check_password_hash
 
-from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share
+from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share, add_file
 from helpers import calculate_md5, get_folder_size, format_size, _
+
+from scripts.mimetypes import getmimeType
+from helpers import calculate_md5
 
 # Create blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
@@ -217,6 +220,14 @@ def share_folder():
 
     try:
         add_share(current_app, md5, abs_path)
+
+        for root, dirs, files in os.walk(abs_path):
+            for file in files:
+                absolute_path = os.path.join(root, file)
+                md5_path = calculate_md5(absolute_path)
+                extension = absolute_path.split('.')[-1]
+                mimeType = getmimeType(extension)
+                add_file(current_app, md5, md5_path, absolute_path, mimeType)
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
 

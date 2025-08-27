@@ -61,7 +61,10 @@ def get_all_from_share(md5_share):
     """
     data = {}
     data["mediaList"] = []
+    print("test1");
     files = get_share_files(current_app, md5_share)
+    print("test2");
+    print(files);
     
     for file in files:
         fileData = {}
