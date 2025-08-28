@@ -64,7 +64,12 @@
     "unknown_content": "Unknown content type",
     "delete": "Delete",
     "confirm_delete_share": "Are you sure you want to delete this share? This will permanently remove the share and all associated files from the database.",
-    "share_deleted_successfully": "Share deleted successfully"
+    "share_deleted_successfully": "Share deleted successfully",
+    "message": "Message",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No"
   },
   "ru": {
     "admin_page_title": "Админская страница: все шары",
@@ -131,6 +136,11 @@
     "unknown_content": "Неизвестный тип содержимого",
     "delete": "Удалить",
     "confirm_delete_share": "Вы уверены, что хотите удалить эту шару? Это навсегда удалит шару и все связанные файлы из базы данных.",
-    "share_deleted_successfully": "Шара успешно удалена"
+    "share_deleted_successfully": "Шара успешно удалена",
+    "message": "Сообщение",
+    "confirm": "Подтвердить",
+    "cancel": "Отмена",
+    "yes": "Да",
+    "no": "Нет"
   }
 }

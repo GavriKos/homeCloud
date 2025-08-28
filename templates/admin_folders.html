@@ -15,8 +15,80 @@
   </div>
 </div>
 {% endblock %}
+
+<!-- Universal message modal -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalTitle">{{ _('message') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">{{ _('confirm') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody">
+                <!-- Confirmation message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+                <button type="button" class="btn btn-primary" id="confirmModalConfirm">{{ _('yes') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block scripts %}
 <script>
+// Universal function to show messages in modal
+function showMessage(title, message, type = 'info') {
+    document.getElementById('messageModalTitle').textContent = title;
+    const body = document.getElementById('messageModalBody');
+
+    let alertClass = 'alert-info';
+    if (type === 'error') alertClass = 'alert-danger';
+    else if (type === 'success') alertClass = 'alert-success';
+    else if (type === 'warning') alertClass = 'alert-warning';
+
+    body.innerHTML = `<div class="alert ${alertClass} mb-0">${message}</div>`;
+    new bootstrap.Modal(document.getElementById('messageModal')).show();
+}
+
+// Universal function to show confirmation modal
+function showConfirm(title, message, onConfirm) {
+    document.getElementById('confirmModalTitle').textContent = title;
+    document.getElementById('confirmModalBody').innerHTML = `<p class="mb-0">${message}</p>`;
+
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+    // Remove any existing event listeners
+    confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+    const newConfirmBtn = document.getElementById('confirmModalConfirm');
+
+    // Add new event listener
+    newConfirmBtn.addEventListener('click', function() {
+        modal.hide();
+        onConfirm();
+    });
+
+    modal.show();
+}
 function createFolderNode(node) {
     const li = document.createElement('li');
     const icon = document.createElement('span');
@@ -46,7 +118,7 @@ function createFolderNode(node) {
                     copyBtn.textContent = "{{ _('copy_public_link') }}";
                 }, 2000);
             }).catch(() => {
-                alert('Не удалось скопировать ссылку');
+                showMessage('{{ _("error") }}', '{{ _("copy_link_failed") }}', 'error');
             });
         };
         li.appendChild(copyBtn);
@@ -67,12 +139,12 @@ function createFolderNode(node) {
                 if (res.success) {
                     location.reload();
                 } else {
-                    alert('Ошибка: ' + (res.error || 'Не удалось расшарить папку'));
+                    showMessage('{{ _("error") }}', res.error || '{{ _("unknown_error") }}', 'error');
                     shareBtn.disabled = false;
                 }
             })
             .catch(() => {
-                alert('Ошибка сети');
+                showMessage('{{ _("error") }}', '{{ _("network_error") }}', 'error');
                 shareBtn.disabled = false;
             });
         };

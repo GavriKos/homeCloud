@@ -118,9 +118,81 @@
     </div>
 </div>
 {% endblock %}
+
+<!-- Universal message modal -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalTitle">{{ _('message') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">{{ _('confirm') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody">
+                <!-- Confirmation message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
+                <button type="button" class="btn btn-primary" id="confirmModalConfirm">{{ _('yes') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
 <script>
+    // Universal function to show messages in modal
+    function showMessage(title, message, type = 'info') {
+        document.getElementById('messageModalTitle').textContent = title;
+        const body = document.getElementById('messageModalBody');
+
+        let alertClass = 'alert-info';
+        if (type === 'error') alertClass = 'alert-danger';
+        else if (type === 'success') alertClass = 'alert-success';
+        else if (type === 'warning') alertClass = 'alert-warning';
+
+        body.innerHTML = `<div class="alert ${alertClass} mb-0">${message}</div>`;
+        new bootstrap.Modal(document.getElementById('messageModal')).show();
+    }
+
+    // Universal function to show confirmation modal
+    function showConfirm(title, message, onConfirm) {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalBody').innerHTML = `<p class="mb-0">${message}</p>`;
+
+        const confirmBtn = document.getElementById('confirmModalConfirm');
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+
+        // Remove any existing event listeners
+        confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+        const newConfirmBtn = document.getElementById('confirmModalConfirm');
+
+        // Add new event listener
+        newConfirmBtn.addEventListener('click', function() {
+            modal.hide();
+            onConfirm();
+        });
+
+        modal.show();
+    }
     let currentIndex = 0;
     let mediaList = null;
     let viewedObject = null;
@@ -144,7 +216,7 @@
                 updateCounter();
             },
             error: function () {
-                alert('{{ _("media_load_error") }}');
+                showMessage('{{ _("error") }}', '{{ _("media_load_error") }}', 'error');
             }
         });
     }
@@ -171,7 +243,7 @@
                     viewedObject = url;
                 },
                 error: function () {
-                    alert('{{ _("media_load_error") }}');
+                    showMessage('{{ _("error") }}', '{{ _("media_load_error") }}', 'error');
                 }
             });
         } else
