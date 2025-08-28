@@ -35,7 +35,8 @@
                 <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">{{ _('open') }}</a></td>
                 <td>
                     <button class="btn btn-sm btn-info me-1 check-integrity-btn" data-share-md5="{{ share['md5'] }}">{{ _('check_integrity') }}</button>
-                    <button class="btn btn-sm btn-warning reindex-btn" data-share-md5="{{ share['md5'] }}">{{ _('reindex') }}</button>
+                    <button class="btn btn-sm btn-warning me-1 reindex-btn" data-share-md5="{{ share['md5'] }}">{{ _('reindex') }}</button>
+                    <button class="btn btn-sm btn-danger delete-share-btn" data-share-md5="{{ share['md5'] }}">{{ _('delete') }}</button>
                 </td>
             </tr>
             {% endfor %}
@@ -167,6 +168,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.disabled = false;
                 this.textContent = '{{ _("reindex_all") }}';
             });
+    });
+
+    // Delete share
+    document.querySelectorAll('.delete-share-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('{{ _("confirm_delete_share") }}')) return;
+
+            const shareMd5 = this.dataset.shareMd5;
+            this.disabled = true;
+            this.textContent = '...';
+
+            fetch(`/admin/delete-share/${shareMd5}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('{{ _("share_deleted_successfully") }}');
+                        location.reload(); // Reload page to update the list
+                    } else {
+                        alert('{{ _("error") }}: ' + (data.error || '{{ _("unknown_error") }}'));
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('{{ _("network_error") }}');
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.textContent = '{{ _("delete") }}';
+                });
+        });
     });
 
     function showIntegrityResult(data, isAll) {

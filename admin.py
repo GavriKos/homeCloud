@@ -8,7 +8,7 @@ import json
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash, current_app
 from werkzeug.security import check_password_hash
 
-from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share, add_file, get_share_files, delete_share_files
+from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share, add_file, get_share_files, delete_share_files, delete_share
 from helpers import calculate_md5, get_folder_size, format_size, _
 
 from scripts.mimetypes import getmimeType
@@ -495,3 +495,32 @@ def reindex_all():
         'total_files_added': total_added,
         'shares': results
     }
+
+
+@admin_bp.route('/admin/delete-share/<share_md5>', methods=['DELETE'])
+def delete_share_route(share_md5):
+    """
+    Delete a share and all its associated files from the database.
+
+    Args:
+        share_md5 (str): MD5 hash of the share to delete
+
+    Returns:
+        JSON response with success status
+    """
+    if not session.get('admin_logged_in'):
+        return {'success': False, 'error': 'Unauthorized'}, 401
+
+    try:
+        # Check if share exists
+        share = get_share(current_app, share_md5)
+        if not share:
+            return {'success': False, 'error': 'Share not found'}, 404
+
+        # Delete the share and all associated files
+        delete_share(current_app, share_md5)
+
+        return {'success': True, 'message': 'Share deleted successfully'}
+
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500

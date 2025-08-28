@@ -202,6 +202,6 @@ def delete_share(app, sharemd5):
         sharemd5 (str): MD5 hash of the share
     """
     db = get_db(app)
-    db.execute('DELETE FROM files WHERE sharemd5 = ?', (sharemd5,))
+    delete_share_files(app, sharemd5)
     db.execute('DELETE FROM shares WHERE md5 = ?', (sharemd5,))
     db.commit()
