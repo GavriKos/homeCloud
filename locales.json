@@ -141,7 +141,7 @@
     "details_by_share": "Детали по шарам",
     "path": "Путь",
     "share_path": "Путь шары",
-    "unknown_content": "Неизвестный тип содержимого",
+    "unknown_content": "Unknown content type",
     "delete": "Удалить",
     "confirm_delete_share": "Вы уверены, что хотите удалить эту шару? Это навсегда удалит шару и все связанные файлы из базы данных.",
     "share_deleted_successfully": "Шара успешно удалена",
