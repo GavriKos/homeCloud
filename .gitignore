@@ -5,3 +5,4 @@ data/
 database.db
 .env
 _pycache_
+tmp/
