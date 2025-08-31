@@ -1,108 +1,122 @@
 {% extends 'base.html' %}
 {% block title %}{{ _('file_viewer') }} — HomeCloud{% endblock %}
 {% block head %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        body {
-            background: #f8f9fa;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<style>
+    body {
+        background: #f8f9fa;
+    }
+
+    .media-viewer-card {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1.5px 4px rgba(0, 0, 0, 0.04);
+        border-radius: 1.2rem;
+        background: #fff;
+        padding: 2rem 2.5rem;
+        max-width: 900px;
+        margin: 40px auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 60vh;
+    }
+
+    .media-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .media-arrow {
+        font-size: 2.1rem;
+        color: #0d6efd;
+        cursor: pointer;
+        transition: color 0.18s, background 0.18s, box-shadow 0.18s;
+        user-select: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        border-radius: 0.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+    }
+
+    .media-arrow:active,
+    .media-arrow:focus {
+        background: #e3f0fd;
+    }
+
+    .media-arrow:hover {
+        color: #1565c0;
+        background: #e3f0fd;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.07);
+    }
+
+    .media-img {
+        max-width: 80vw;
+        max-height: 65vh;
+        border-radius: 0.7rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+        background: #f1f3f4;
+    }
+
+    .media-info {
+        margin-top: 1.2rem;
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 600px) {
         .media-viewer-card {
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
-            border-radius: 1.2rem;
-            background: #fff;
-            padding: 2rem 2.5rem;
-            max-width: 900px;
-            margin: 40px auto;
+            padding: 0.5rem 0.2rem;
+            max-width: 100vw;
+            margin: 0;
+            min-height: 80vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-height: 60vh;
+            justify-content: flex-start;
         }
-        .media-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-        }
-        .media-arrow {
-            font-size: 2.1rem;
-            color: #0d6efd;
-            cursor: pointer;
-            transition: color 0.18s, background 0.18s, box-shadow 0.18s;
-            user-select: none;
-            border: none;
-            outline: none;
-            background: transparent;
-            border-radius: 0.4rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: none;
-        }
-        .media-arrow:active, .media-arrow:focus {
-            background: #e3f0fd;
-        }
-        .media-arrow:hover {
-            color: #1565c0;
-            background: #e3f0fd;
-            box-shadow: 0 2px 8px rgba(13,110,253,0.07);
-        }
+
         .media-img {
-            max-width: 80vw;
-            max-height: 65vh;
-            border-radius: 0.7rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-            background: #f1f3f4;
+            max-width: 98vw;
+            max-height: 38vh;
         }
+
+        .media-controls {
+            gap: 0.7rem;
+            margin-bottom: 0.7rem;
+            margin-top: auto;
+            order: 10;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .media-arrow {
+            font-size: 1.7rem;
+            padding: 0.15em 0.25em;
+            background: transparent;
+        }
+
         .media-info {
-            margin-top: 1.2rem;
-            color: #555;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            margin-top: 0.7rem;
+            order: 9;
         }
-        @media (max-width: 600px) {
-            .media-viewer-card {
-                padding: 0.5rem 0.2rem;
-                max-width: 100vw;
-                margin: 0;
-                min-height: 80vh;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-            }
-            .media-img {
-                max-width: 98vw;
-                max-height: 38vh;
-            }
-            .media-controls {
-                gap: 0.7rem;
-                margin-bottom: 0.7rem;
-                margin-top: auto;
-                order: 10;
-                width: 100%;
-                justify-content: center;
-            }
-            .media-arrow {
-                font-size: 1.7rem;
-                padding: 0.15em 0.25em;
-                background: transparent;
-            }
-            .media-info {
-                font-size: 1rem;
-                margin-top: 0.7rem;
-                order: 9;
-            }
+    }
+
+    /* Mobile buttons under image */
+    @media (max-width: 600px) {
+        .media-controls {
+            flex-direction: row;
+            width: 100%;
+            justify-content: center;
         }
-        /* Mobile buttons under image */
-        @media (max-width: 600px) {
-            .media-controls {
-                flex-direction: row;
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
+    }
+</style>
 {% endblock %}
 {% block content %}
 <div class="media-viewer-card">
@@ -186,7 +200,7 @@
         const newConfirmBtn = document.getElementById('confirmModalConfirm');
 
         // Add new event listener
-        newConfirmBtn.addEventListener('click', function() {
+        newConfirmBtn.addEventListener('click', function () {
             modal.hide();
             onConfirm();
         });
@@ -225,7 +239,8 @@
         console.log(mediaList);
         if (!mediaList || !mediaList[index]) return;
         updateCounter();
-        if (mediaList[index]["mimetype"] == "image") {
+        let mimetype = mediaList[index]["mimetype"];
+        if (mimetype == "image") {
             $('#media-link').removeAttr("data-type");
             $('#media-link').attr('data-fancybox', "gallery");
             $.ajax({
@@ -247,28 +262,28 @@
                 }
             });
         } else
-        if (mediaList[index]["mimetype"] == "video") {
-            $('#media').attr('src', "/static/video_without_thumb.jpg");
-            $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
-            $('#media-link').removeAttr("data-type");
-            $('#media-link').attr('data-fancybox', "gallery");
-            fancyAdaptateVideo();
-        } else
-        if (mediaList[index]["mimetype"] == "maptrack") {
-            $('#media').attr('src', "/static/map_without_thumb.jpg");
-            $('#media-link').attr('href', "/external-viewer/maptrack/" + md5 + '/' + mediaList[index]["md5"]);
-            $('#media-link').attr('data-type', "iframe");
-            $('#media-link').attr('data-fancybox', "iframe");
-            fancyAdaptateIFrameMap();
-        }
-        else {
-            // Clear any previous fancybox settings
-            $('#media-link').removeAttr("data-fancybox");
-            $('#media-link').removeAttr("data-type");
-            $('#media-link').removeAttr("href");
+            if (mimetype == "video") {
+                $('#media').attr('src', "/static/video_without_thumb.jpg");
+                $('#media-link').attr('href', '/share/' + md5 + '/' + mediaList[index]["md5"]);
+                $('#media-link').removeAttr("data-type");
+                $('#media-link').attr('data-fancybox', "gallery");
+                fancyAdaptateVideo();
+            } else
+                if (mimetype == "maptrack") {
+                    $('#media').attr('src', "/static/map_without_thumb.jpg");
+                    $('#media-link').attr('href', "/external-viewer/maptrack/" + md5 + '/' + mediaList[index]["md5"]);
+                    $('#media-link').attr('data-type', "iframe");
+                    $('#media-link').attr('data-fancybox', "iframe");
+                    fancyAdaptateIFrameMap();
+                }
+                else {
+                    // Clear any previous fancybox settings
+                    $('#media-link').removeAttr("data-fancybox");
+                    $('#media-link').removeAttr("data-type");
+                    $('#media-link').removeAttr("href");
 
-            // Show unknown content message
-            $('#media').attr('src', 'data:image/svg+xml;base64,' + btoa(`
+                    // Show unknown content message
+                    $('#media').attr('src', 'data:image/svg+xml;base64,' + btoa(`
                 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
                     <rect width="400" height="300" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
                     <text x="200" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#6c757d">
@@ -280,12 +295,12 @@
                 </svg>
             `));
 
-            // Disable fancybox for unknown content
-            $('#media-link').off('click').on('click', function(e) {
-                e.preventDefault();
-                return false;
-            });
-        }
+                    // Disable fancybox for unknown content
+                    $('#media-link').off('click').on('click', function (e) {
+                        e.preventDefault();
+                        return false;
+                    });
+                }
     }
 
     $('#prev').click(function () {
@@ -310,18 +325,18 @@
             loop: true,
             iframe: { css: {} },
             // closeClickOutside: true // Doesn't work, so custom handler below
-            afterShow: function(instance, current) {
+            afterShow: function (instance, current) {
                 // Remove previous handler if exists
                 $(document).off('mousedown.fancybox-close');
                 // Add new handler
-                $('.fancybox-bg').on('mousedown.fancybox-close', function(e) {
+                $('.fancybox-bg').on('mousedown.fancybox-close', function (e) {
                     // Check that click was on overlay, not on image
                     if ($(e.target).hasClass('fancybox-bg')) {
                         $.fancybox.close();
                     }
                 });
             },
-            afterClose: function() {
+            afterClose: function () {
                 $('.fancybox-bg').off('mousedown.fancybox-close');
             }
         });
