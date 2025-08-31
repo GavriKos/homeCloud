@@ -198,6 +198,8 @@ SECRET_KEY=your-secret-key-change-this-in-production
 DATABASE=database.db
 UPLOAD_FOLDER=data
 FLASK_ENV=development
+# Optional: external URL for sharing (e.g., https://yourdomain.com)
+EXTERNAL_URL=
 """
     
     with open(env_path, 'w', encoding='utf-8') as f:

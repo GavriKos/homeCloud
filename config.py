@@ -25,6 +25,9 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'data')
 
+    # External URL for sharing (if different from internal URL)
+    EXTERNAL_URL = os.getenv('EXTERNAL_URL', None)
+
 
 class DevelopmentConfig(Config):
     """Development environment configuration."""

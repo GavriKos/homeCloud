@@ -7,4 +7,6 @@ Flask-Compress==1.14
 gunicorn==21.2.0
 Werkzeug==3.0.1
 SQLAlchemy==2.0.27
-python-magic==0.4.27 
+python-magic==0.4.27
+qrcode==7.4.2
+Pillow==10.2.0

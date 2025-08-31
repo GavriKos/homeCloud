@@ -69,7 +69,15 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "copy_link": "Copy Link",
+    "share_link": "Share Link",
+    "qr_code": "QR Code",
+    "share_via": "Share via",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "viber": "Viber",
+    "share_options": "Share Options"
   },
   "ru": {
     "admin_page_title": "Админская страница: все шары",
@@ -141,6 +149,14 @@
     "confirm": "Подтвердить",
     "cancel": "Отмена",
     "yes": "Да",
-    "no": "Нет"
+    "no": "Нет",
+    "copy_link": "Скопировать ссылку",
+    "share_link": "Поделиться ссылкой",
+    "qr_code": "QR-код",
+    "share_via": "Поделиться через",
+    "telegram": "Телеграм",
+    "whatsapp": "WhatsApp",
+    "viber": "Viber",
+    "share_options": "Варианты поделиться"
   }
 }

@@ -32,7 +32,12 @@
             <tr>
                 <td class="text-monospace small">{{ share['md5'] }}</td>
                 <td>{{ share['path'] }}</td>
-                <td><a class="btn btn-sm btn-outline-primary" href="/share/{{ share['md5'] }}" target="_blank">{{ _('open') }}</a></td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary me-1" href="/share/{{ share['md5'] }}" target="_blank">{{ _('open') }}</a>
+                    <button class="btn btn-sm btn-primary share-link-btn" data-share-md5="{{ share['md5'] }}">
+                        <i class="bi bi-share"></i> {{ _('share_link') }}
+                    </button>
+                </td>
                 <td>
                     <button class="btn btn-sm btn-info me-1 check-integrity-btn" data-share-md5="{{ share['md5'] }}">{{ _('check_integrity') }}</button>
                     <button class="btn btn-sm btn-warning me-1 reindex-btn" data-share-md5="{{ share['md5'] }}">{{ _('reindex') }}</button>
@@ -97,6 +102,47 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="confirmModalConfirm">{{ _('yes') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('share_options') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 text-center">
+                        <h6>{{ _('qr_code') }}</h6>
+                        <div id="qrCodeContainer" class="mb-3">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{{ _('share_via') }}</h6>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-info" id="shareToTelegram">
+                                <i class="bi bi-telegram"></i> {{ _('telegram') }}
+                            </button>
+                            <button class="btn btn-success" id="shareToWhatsApp">
+                                <i class="bi bi-whatsapp"></i> {{ _('whatsapp') }}
+                            </button>
+                            <button class="btn btn-purple" id="shareToViber" style="background-color: #665CAC; border-color: #665CAC; color: white;">
+                                <i class="bi bi-chat-dots"></i> {{ _('viber') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('close') }}</button>
             </div>
         </div>
     </div>
@@ -368,6 +414,65 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('resultModalBody').innerHTML = html;
         new bootstrap.Modal(document.getElementById('resultModal')).show();
     }
+
+    // Share link functionality
+    document.querySelectorAll('.share-link-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const shareMd5 = this.dataset.shareMd5;
+            showShareModal(shareMd5);
+        });
+    });
+});
+
+// Share functionality
+let currentShareUrl = '';
+
+function showShareModal(md5) {
+    currentShareUrl = window.location.origin + '/share/' + md5;
+
+    // Show modal
+    const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+    shareModal.show();
+
+    // Reset QR code container
+    document.getElementById('qrCodeContainer').innerHTML = `
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    `;
+
+    // Generate QR code
+    fetch('/admin/share/qr/' + md5)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('qrCodeContainer').innerHTML =
+                    `<img src="${data.qr_code}" alt="QR Code" class="img-fluid" style="max-width: 200px;">`;
+            } else {
+                document.getElementById('qrCodeContainer').innerHTML =
+                    '<div class="alert alert-danger">{{ _("error") }}</div>';
+            }
+        })
+        .catch(() => {
+            document.getElementById('qrCodeContainer').innerHTML =
+                '<div class="alert alert-danger">{{ _("error") }}</div>';
+        });
+}
+
+// Share to different platforms
+document.getElementById('shareToTelegram').addEventListener('click', function() {
+    const text = encodeURIComponent(`Check out this shared content: ${currentShareUrl}`);
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(currentShareUrl)}&text=${text}`, '_blank');
+});
+
+document.getElementById('shareToWhatsApp').addEventListener('click', function() {
+    const text = encodeURIComponent(`Check out this shared content: ${currentShareUrl}`);
+    window.open(`https://web.whatsapp.com/send?text=${text}`, '_blank');
+});
+
+document.getElementById('shareToViber').addEventListener('click', function() {
+    const text = encodeURIComponent(`Check out this shared content: ${currentShareUrl}`);
+    window.open(`viber://forward?text=${text}`, '_blank');
 });
 </script>
 {% endblock %}

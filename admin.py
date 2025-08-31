@@ -5,8 +5,12 @@ Contains administrative routes for user management, folder management, and syste
 
 import os
 import json
-from flask import Blueprint, request, render_template, redirect, url_for, session, flash, current_app
+import io
+import base64
+from flask import Blueprint, request, render_template, redirect, url_for, session, flash, current_app, jsonify
 from werkzeug.security import check_password_hash
+import qrcode
+from qrcode.image.pil import PilImage
 
 from scripts.db import get_all_shares, create_admin_user, get_user_by_username, check_admin_exists, get_share, add_share, add_file, get_share_files, delete_share_files, delete_share
 from helpers import calculate_md5, get_folder_size, format_size, _
@@ -524,3 +528,59 @@ def delete_share_route(share_md5):
 
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
+
+
+@admin_bp.route('/admin/share/qr/<md5_share>')
+def generate_admin_qr_code(md5_share):
+    """
+    Generate QR code for a share URL (admin version).
+
+    Args:
+        md5_share (str): MD5 hash of the share
+
+    Returns:
+        JSON response with base64 encoded QR code image
+    """
+    if not session.get('admin_logged_in'):
+        return {'success': False, 'error': 'Unauthorized'}, 401
+
+    try:
+        # Get the base URL from config or request
+        external_url = current_app.config.get('EXTERNAL_URL')
+        if external_url:
+            base_url = external_url.rstrip('/')
+        else:
+            base_url = request.url_root.rstrip('/')
+
+        share_url = f"{base_url}/share/{md5_share}"
+
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(share_url)
+        qr.make(fit=True)
+
+        # Create QR code image
+        img = qr.make_image(fill_color="black", back_color="white")
+
+        # Convert to base64
+        img_buffer = io.BytesIO()
+        img.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+
+        return jsonify({
+            'success': True,
+            'qr_code': f"data:image/png;base64,{img_base64}",
+            'share_url': share_url
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
