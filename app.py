@@ -90,5 +90,8 @@ def create_app(config_name='default'):
 # Создаем приложение с нужной конфигурацией
 app = create_app(os.getenv('FLASK_ENV', 'default'))
 
+# For WSGI server compatibility
+application = app
+
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'])
