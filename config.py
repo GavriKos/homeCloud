@@ -5,13 +5,14 @@ Contains configuration classes for different environments.
 
 import os
 from dotenv import load_dotenv
+import secrets
 
 load_dotenv()
 
 
 class Config:
     """Base configuration class with common settings."""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev')
+    SECRET_KEY = os.getenv('SECRET_KEY', secrets.token_hex(16))
     DATABASE = os.getenv('DATABASE', 'database.db')
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{DATABASE}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
