@@ -48,10 +48,8 @@
         fetch('/admin/share/externalLink/' + md5)
             .then(response => response.json())
             .then(data => {
-                alert(data)
                 if (data.success) {
                     currentShareUrl = data.share_url;
-                    alert(currentShareUrl);
                 } else {
                     showMessage('{{ _("error") }}', data.error || '{{ _("unknown_error") }}', 'error');
                 }
