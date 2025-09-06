@@ -129,11 +129,13 @@ docker run -p 5000:5000 homecloud
 ```
 
 ### Environment Variables
-Set the following environment variables for production:
+The application runs in production mode by default. For development, set:
 ```bash
-export FLASK_ENV=production
+export FLASK_ENV=development  # Enables debug mode
 export SECRET_KEY=your-secure-secret-key
 ```
+
+For production, ensure you have a secure SECRET_KEY in your `.env` file.
 
 ## Development Commands
 
@@ -172,8 +174,12 @@ The application can be configured using environment variables or a `.env` file:
 SECRET_KEY=your-secret-key-change-this-in-production
 DATABASE=database.db
 UPLOAD_FOLDER=data
-FLASK_ENV=development
+FLASK_ENV=production  # Use 'development' for debugging
+EXTERNAL_URL=  # Optional: external URL for sharing
 ```
+
+**Important**: The application runs in production mode by default (no debug output, secure cookies).
+Set `FLASK_ENV=development` only for local development and testing.
 
 ## Project Status
 
