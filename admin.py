@@ -529,6 +529,23 @@ def delete_share_route(share_md5):
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
 
+@admin_bp.route('/admin/share/externalLink/<md5_share>')
+def get_external_link(md5_share):
+    if not session.get('admin_logged_in'):
+        return {'success': False, 'error': 'Unauthorized'}, 401
+    
+    external_url = current_app.config.get('EXTERNAL_URL')
+    if external_url:
+        base_url = external_url.rstrip('/')
+    else:
+        base_url = request.url_root.rstrip('/')
+
+    share_url = f"{base_url}/share/{md5_share}"
+
+    return jsonify({
+        'success': True,
+        'share_url': share_url
+    })
 
 @admin_bp.route('/admin/share/qr/<md5_share>')
 def generate_admin_qr_code(md5_share):

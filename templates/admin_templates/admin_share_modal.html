@@ -44,7 +44,22 @@
     let currentShareUrl = '';
 
     function showShareModal(md5) {
-        currentShareUrl = window.location.origin + '/share/' + md5;
+
+        fetch('/admin/share/externalLink/' + md5)
+            .then(response => response.json())
+            .then(data => {
+                alert(data)
+                if (data.success) {
+                    currentShareUrl = data.share_url;
+                    alert(currentShareUrl);
+                } else {
+                    showMessage('{{ _("error") }}', data.error || '{{ _("unknown_error") }}', 'error');
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                showMessage('{{ _("error") }}', '{{ _("network_error") }}', 'error');
+            });
 
         // Show modal
         const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
