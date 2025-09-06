@@ -197,7 +197,7 @@ def create_env_file():
 SECRET_KEY=your-secret-key-change-this-in-production
 DATABASE=database.db
 UPLOAD_FOLDER=data
-FLASK_ENV=development
+FLASK_ENV=production
 # Optional: external URL for sharing (e.g., https://yourdomain.com)
 EXTERNAL_URL=
 """
@@ -205,7 +205,7 @@ EXTERNAL_URL=
     with open(env_path, 'w', encoding='utf-8') as f:
         f.write(env_content)
     
-    print(".env file created. Please update SECRET_KEY for production use.")
+    print(".env file created with production settings. Please update SECRET_KEY before use.")
 
 
 def setup_test_data():
@@ -264,14 +264,14 @@ def main():
     print("Setup completed successfully!")
     print("=" * 50)
     print("\nNext steps:")
-    print("1. Update SECRET_KEY in .env file for production")
+    print("1. Update SECRET_KEY in .env file before deployment")
     print("2. Start the application:")
-    print("   python app.py")
-    print("3. Or use Flask development server:")
-    print("   flask run")
-    print("4. Access the application at http://localhost:5000")
-    print("\nFor production deployment, consider using gunicorn:")
-    print("   gunicorn -w 4 -b 0.0.0.0:5000 'app:create_app()'")
+    print("   For development: Set FLASK_ENV=development in .env, then run:")
+    print("     python app.py")
+    print("   For production: Use a WSGI server:")
+    print("     gunicorn --bind 0.0.0.0:5000 wsgi:application")
+    print("     waitress-serve --port=5000 wsgi:application")
+    print("3. Access the application at http://localhost:5000")
 
 
 if __name__ == "__main__":

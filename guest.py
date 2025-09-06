@@ -21,14 +21,25 @@ guest_bp = Blueprint('guest', __name__)
 def get_share(md5):
     """
     Display the share view page for a given share MD5.
-    
+
     Args:
         md5 (str): MD5 hash of the share
-        
+
     Returns:
         Rendered template for share viewing
     """
-    return render_template('share_view.html')
+    from scripts.db import get_share
+    import os
+
+    # Get share information
+    share = get_share(current_app, md5)
+    if not share:
+        return "Share not found", 404
+
+    # Extract folder name from path (only the folder name, not full path)
+    folder_name = os.path.basename(share['path'])
+
+    return render_template('share_view.html', folder_name=folder_name)
 
 
 @guest_bp.route('/external-viewer/<mimetype>/<md5_share>/<md5_file>')
@@ -74,6 +85,7 @@ def get_all_from_share(md5_share):
         fileData = {}
         fileData["md5"] = file['md5']
         fileData["mimetype"] = file['mimetype']
+        fileData["path"] = file['path']
         data["mediaList"].append(fileData)
     
     return json.dumps(data)

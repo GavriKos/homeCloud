@@ -5,132 +5,278 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 <style>
     body {
-        background: #f8f9fa;
+        background: #000;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
     }
 
-    .media-viewer-card {
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1.5px 4px rgba(0, 0, 0, 0.04);
-        border-radius: 1.2rem;
-        background: #fff;
-        padding: 2rem 2.5rem;
-        max-width: 900px;
-        margin: 40px auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 60vh;
+    /* Remove default container margins for fullscreen */
+    .container.mb-5 {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        height: calc(100vh - 76px); /* Account for navbar height */
+        width: 100vw !important;
     }
 
-    .media-controls {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-        margin-bottom: 1.5rem;
+    /* Adjust navbar for better contrast */
+    .navbar {
+        margin-bottom: 0 !important;
+        z-index: 1050;
     }
 
-    .media-arrow {
-        font-size: 2.1rem;
-        color: #0d6efd;
-        cursor: pointer;
-        transition: color 0.18s, background 0.18s, box-shadow 0.18s;
-        user-select: none;
-        border: none;
-        outline: none;
-        background: transparent;
-        border-radius: 0.4rem;
+    .media-viewer-fullscreen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #000;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: none;
     }
 
-    .media-arrow:active,
-    .media-arrow:focus {
-        background: #e3f0fd;
-    }
-
-    .media-arrow:hover {
-        color: #1565c0;
-        background: #e3f0fd;
-        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.07);
+    .media-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
     }
 
     .media-img {
-        max-width: 80vw;
-        max-height: 65vh;
-        border-radius: 0.7rem;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
-        background: #f1f3f4;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        cursor: pointer;
+        display: block;
     }
 
-    .media-info {
-        margin-top: 1.2rem;
-        color: #555;
-        font-size: 1.1rem;
+    .media-controls {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0 2rem;
+        pointer-events: none;
+        z-index: 10;
     }
 
-    @media (max-width: 600px) {
-        .media-viewer-card {
-            padding: 0.5rem 0.2rem;
-            max-width: 100vw;
-            margin: 0;
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+    .media-arrow {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.5rem;
+        pointer-events: auto;
+        user-select: none;
+        backdrop-filter: blur(10px);
+        border: none;
+        outline: none;
+    }
+
+    .media-arrow:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.1);
+    }
+
+    .media-arrow:active {
+        transform: scale(0.95);
+    }
+
+    @media (max-width: 768px) {
+        body {
+            overflow: hidden;
         }
 
-        .media-img {
-            max-width: 98vw;
-            max-height: 38vh;
+        .container.mb-5 {
+            position: relative !important;
         }
 
         .media-controls {
-            gap: 0.7rem;
-            margin-bottom: 0.7rem;
-            margin-top: auto;
-            order: 10;
-            width: 100%;
-            justify-content: center;
+            padding: 0 1rem;
         }
 
         .media-arrow {
-            font-size: 1.7rem;
-            padding: 0.15em 0.25em;
-            background: transparent;
-        }
-
-        .media-info {
-            font-size: 1rem;
-            margin-top: 0.7rem;
-            order: 9;
+            width: 50px;
+            height: 50px;
+            font-size: 1.3rem;
         }
     }
 
-    /* Mobile buttons under image */
-    @media (max-width: 600px) {
+    /* Mobile landscape orientation */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .navbar {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1060;
+            background: rgba(13, 110, 253, 0.9) !important; /* Semi-transparent */
+            backdrop-filter: blur(10px);
+        }
+
+        .container.mb-5 {
+            height: 100vh !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .media-viewer-fullscreen {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100vh !important;
+            padding-top: 0; /* No padding - navbar overlays */
+        }
+
+        .media-content {
+            height: 100vh; /* Full viewport height */
+            width: 100vw;
+        }
+
+        .media-img {
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+
         .media-controls {
-            flex-direction: row;
-            width: 100%;
-            justify-content: center;
+            z-index: 1050; /* Below navbar but above image */
+        }
+
+        .media-arrow {
+            background: rgba(0, 0, 0, 0.8) !important;
+            backdrop-filter: blur(5px);
+        }
+    }
+
+    /* Mobile portrait orientation */
+    @media (max-width: 768px) and (orientation: portrait) {
+        .navbar {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1060;
+        }
+
+        .container.mb-5 {
+            height: 100vh !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .media-viewer-fullscreen {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100vh !important;
+            padding-top: 76px; /* Space for navbar */
+        }
+
+        .media-content {
+            height: calc(100vh - 76px);
+            width: 100vw;
+        }
+    }
+
+    /* Very small screens - smaller arrow buttons */
+    @media (max-width: 480px) {
+        .media-controls {
+            padding: 0 0.5rem;
+        }
+
+        .media-arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Extra rule for very low height screens (landscape phones) */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .navbar {
+            position: fixed !important;
+            background: rgba(13, 110, 253, 0.9) !important;
+            backdrop-filter: blur(10px);
+            z-index: 1060;
+        }
+
+        .media-viewer-fullscreen {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+
+        .media-content {
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+
+        .media-img {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: contain !important;
         }
     }
 </style>
 {% endblock %}
 {% block content %}
-<div class="media-viewer-card">
-    <a id="media-link" data-fancybox="gallery" href="image1.jpg">
-        <img id="media" src="image1.jpg" alt="Media" class="media-img">
-    </a>
-    <div class="media-info text-center">
-        <span id="media-counter">1 / 1</span>
-    </div>
-    <div class="media-controls mb-3">
-        <span class="media-arrow" id="prev" title="{{ _('previous') }}"><i class="bi bi-chevron-left"></i></span>
-        <span class="media-arrow" id="next" title="{{ _('next') }}"><i class="bi bi-chevron-right"></i></span>
+<div class="media-viewer-fullscreen">
+    <div class="media-content">
+        <a id="media-link" data-fancybox="gallery" href="image1.jpg">
+            <img id="media" src="image1.jpg" alt="Media" class="media-img">
+        </a>
+
+        <div class="media-controls">
+            <button class="media-arrow" id="prev" title="{{ _('previous') }}">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="media-arrow" id="next" title="{{ _('next') }}">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
     </div>
 </div>
+
+<script>
+// Update navbar content when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const navbarBrand = document.querySelector('.navbar-brand');
+    if (navbarBrand) {
+        navbarBrand.innerHTML = '<span id="folder-name">{{ folder_name }}</span>';
+    }
+
+    // Add counter to navbar
+    const navbarContainer = document.querySelector('.navbar .container');
+    if (navbarContainer) {
+        const counterDiv = document.createElement('div');
+        counterDiv.className = 'navbar-text text-light me-3';
+        counterDiv.innerHTML = '<span id="media-counter">1 / 1</span>';
+        navbarContainer.insertBefore(counterDiv, navbarContainer.querySelector('.ms-auto'));
+    }
+
+
+});
+</script>
 {% endblock %}
 
 <!-- Universal message modal -->
@@ -219,6 +365,13 @@
         }
     }
 
+    function updateFilename() {
+        if (mediaList && mediaList[currentIndex]) {
+            const filename = mediaList[currentIndex].path.split('/').pop();
+            $("#current-filename").text(filename);
+        }
+    }
+
     function loadAll() {
         $.ajax({
             url: '/share/all/' + md5,
@@ -228,6 +381,7 @@
                 currentIndex = 0;
                 loadMedia(currentIndex);
                 updateCounter();
+                updateFilename();
             },
             error: function () {
                 showMessage('{{ _("error") }}', '{{ _("media_load_error") }}', 'error');
@@ -239,6 +393,7 @@
         console.log(mediaList);
         if (!mediaList || !mediaList[index]) return;
         updateCounter();
+        updateFilename();
         let mimetype = mediaList[index]["mimetype"];
         if (mimetype == "image") {
             $('#media-link').removeAttr("data-type");
@@ -357,5 +512,16 @@
             iframe: { css: { width: '80%', height: '80%' } }
         });
     }
+
+    // Keyboard navigation
+    $(document).keydown(function(e) {
+        if (e.keyCode === 37) { // Left arrow
+            e.preventDefault();
+            $('#prev').click();
+        } else if (e.keyCode === 39) { // Right arrow
+            e.preventDefault();
+            $('#next').click();
+        }
+    });
 </script>
 {% endblock %}

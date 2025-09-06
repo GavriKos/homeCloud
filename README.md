@@ -71,6 +71,72 @@ If you prefer to set up manually:
 8. **Open in your browser:**
    - Go to [http://localhost:5000](http://localhost:5000)
 
+## Running the Application
+
+HomeCloud supports multiple ways to run the application, depending on your needs:
+
+### Development Mode
+For development and testing:
+```bash
+# Using Flask development server
+python app.py
+
+# Or using Flask CLI
+flask run
+
+# Using Make (if available)
+make dev
+```
+
+### Production Deployment
+
+For production environments, use a proper WSGI server:
+
+#### Using Gunicorn (Linux/macOS)
+```bash
+# Basic usage
+gunicorn --bind 0.0.0.0:5000 wsgi:application
+
+# With multiple workers
+gunicorn --bind 0.0.0.0:5000 --workers 4 wsgi:application
+
+# Alternative using app.py
+gunicorn --bind 0.0.0.0:5000 app:app
+```
+
+#### Using Waitress (Windows/Cross-platform)
+```bash
+# Using wsgi.py (recommended)
+waitress-serve --port=5000 wsgi:application
+
+# Alternative using app.py
+waitress-serve --port=5000 app:app
+```
+
+#### Using uWSGI
+```bash
+uwsgi --http :5000 --wsgi-file wsgi.py --callable application
+```
+
+### Docker Deployment
+```bash
+# Using Docker Compose (recommended)
+docker-compose up --build
+
+# Or build and run manually
+docker build -t homecloud .
+docker run -p 5000:5000 homecloud
+```
+
+### Environment Variables
+The application runs in production mode by default. For development, set:
+```bash
+export FLASK_ENV=development  # Enables debug mode
+export SECRET_KEY=your-secure-secret-key
+```
+
+For production, ensure you have a secure SECRET_KEY in your `.env` file.
+
 ## Development Commands
 
 If you're using the Makefile, you have access to additional development commands:
@@ -108,8 +174,12 @@ The application can be configured using environment variables or a `.env` file:
 SECRET_KEY=your-secret-key-change-this-in-production
 DATABASE=database.db
 UPLOAD_FOLDER=data
-FLASK_ENV=development
+FLASK_ENV=production  # Use 'development' for debugging
+EXTERNAL_URL=  # Optional: external URL for sharing
 ```
+
+**Important**: The application runs in production mode by default (no debug output, secure cookies).
+Set `FLASK_ENV=development` only for local development and testing.
 
 ## Project Status
 
