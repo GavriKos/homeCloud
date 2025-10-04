@@ -7,9 +7,9 @@ from flask import send_file
 
 # Mapping of MIME types to file extensions
 mimetypes_extensions_map = {
-    "video": ["mp4"],
+    "video": ["mp4", "avi", "mov", "mkv", "webm"],
     "maptrack": ["gpx"],
-    "image": ["jpg", "png", "jpeg"],
+    "image": ["jpg", "png", "jpeg", "webp", "gif", "bmp", "tiff", "svg"],
     "unknown": []
 }
 mimetype_unknown = "unknown"
@@ -25,7 +25,26 @@ def sendImage(filepath):
     Returns:
         Response: Flask file response for image
     """
-    return send_file(filepath, mimetype='image/jpeg')
+    import os
+
+    # Get file extension and determine proper MIME type
+    _, ext = os.path.splitext(filepath.lower())
+    ext = ext.lstrip('.')
+
+    # Map extensions to MIME types
+    mime_map = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'webp': 'image/webp',
+        'gif': 'image/gif',
+        'bmp': 'image/bmp',
+        'tiff': 'image/tiff',
+        'svg': 'image/svg+xml'
+    }
+
+    mimetype = mime_map.get(ext, 'image/jpeg')  # Default to jpeg if unknown
+    return send_file(filepath, mimetype=mimetype)
 
 
 def sendVideo(filepath):
@@ -58,7 +77,8 @@ def sentFileBlob(filepath):
 mimetypes_returns = {
     'image': sendImage,
     'video': sendVideo,
-    'maptrack': sentFileBlob
+    'maptrack': sentFileBlob,
+    'unknown': sentFileBlob  # Handle unknown files as binary blobs
 }
 
 
@@ -89,4 +109,6 @@ def getFileByMimetype(mimetype, filePath):
     Returns:
         Response: Flask file response using appropriate handler
     """
-    return mimetypes_returns[mimetype](filePath)
+    # Use the appropriate handler or default to binary blob for unknown types
+    handler = mimetypes_returns.get(mimetype, sentFileBlob)
+    return handler(filePath)
