@@ -23,7 +23,7 @@ class Config:
     SESSION_COOKIE_SAMESITE = 'Lax'
 
     # File upload settings
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB max file size
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'data')
 
     # External URL for sharing (if different from internal URL)

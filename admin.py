@@ -9,6 +9,7 @@ import io
 import base64
 from flask import Blueprint, request, render_template, redirect, url_for, session, flash, current_app, jsonify
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 import qrcode
 from qrcode.image.pil import PilImage
 
@@ -106,6 +107,20 @@ def admin_folders():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin.login'))
     return render_template('admin_folders.html')
+
+
+@admin_bp.route('/admin/file-manager')
+def admin_file_manager():
+    """
+    Display the admin file manager page.
+    Requires admin authentication.
+
+    Returns:
+        Admin file manager template or redirect to login
+    """
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin.login'))
+    return render_template('admin_file_manager.html')
 
 
 @admin_bp.route('/admin/shares')
@@ -601,3 +616,121 @@ def generate_admin_qr_code(md5_share):
             'success': False,
             'error': str(e)
         }), 500
+
+
+@admin_bp.route('/admin/create-folder', methods=['POST'])
+def create_folder():
+    """
+    Create a new folder in the upload directory.
+
+    Returns:
+        JSON response with success status
+    """
+    if not session.get('admin_logged_in'):
+        return {'success': False, 'error': 'Unauthorized'}, 401
+
+    data = request.get_json()
+    folder_name = data.get('folder_name', '').strip()
+    parent_path = data.get('parent_path', '').strip()
+
+    if not folder_name:
+        return {'success': False, 'error': 'Folder name is required'}, 400
+
+    # Secure the folder name
+    folder_name = secure_filename(folder_name)
+    if not folder_name:
+        return {'success': False, 'error': 'Invalid folder name'}, 400
+
+    try:
+        # Build the full path
+        if parent_path:
+            full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], parent_path, folder_name)
+        else:
+            full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], folder_name)
+
+        # Check if folder already exists
+        if os.path.exists(full_path):
+            return {'success': False, 'error': 'Folder already exists'}, 400
+
+        # Create the folder
+        os.makedirs(full_path, exist_ok=True)
+
+        return {'success': True, 'message': 'Folder created successfully', 'path': full_path}
+
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500
+
+
+@admin_bp.route('/admin/upload-files', methods=['POST'])
+def upload_files():
+    """
+    Upload multiple files to a specified directory.
+
+    Returns:
+        JSON response with upload results
+    """
+    if not session.get('admin_logged_in'):
+        return {'success': False, 'error': 'Unauthorized'}, 401
+
+    target_path = request.form.get('target_path', '').strip()
+
+    if 'files' not in request.files:
+        return {'success': False, 'error': 'No files provided'}, 400
+
+    files = request.files.getlist('files')
+    if not files or all(f.filename == '' for f in files):
+        return {'success': False, 'error': 'No files selected'}, 400
+
+    try:
+        # Build target directory path
+        if target_path:
+            upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], target_path)
+        else:
+            upload_dir = current_app.config['UPLOAD_FOLDER']
+
+        # Ensure target directory exists
+        os.makedirs(upload_dir, exist_ok=True)
+
+        uploaded_files = []
+        failed_files = []
+
+        for file in files:
+            if file.filename == '':
+                continue
+
+            try:
+                # Secure the filename
+                filename = secure_filename(file.filename)
+                if not filename:
+                    failed_files.append({'filename': file.filename, 'error': 'Invalid filename'})
+                    continue
+
+                # Build full file path
+                file_path = os.path.join(upload_dir, filename)
+
+                # Handle duplicate filenames by adding a number
+                counter = 1
+                original_filename = filename
+                while os.path.exists(file_path):
+                    name, ext = os.path.splitext(original_filename)
+                    filename = f"{name}_{counter}{ext}"
+                    file_path = os.path.join(upload_dir, filename)
+                    counter += 1
+
+                # Save the file
+                file.save(file_path)
+                uploaded_files.append({'filename': filename, 'path': file_path})
+
+            except Exception as e:
+                failed_files.append({'filename': file.filename, 'error': str(e)})
+
+        return {
+            'success': True,
+            'uploaded_files': uploaded_files,
+            'failed_files': failed_files,
+            'total_uploaded': len(uploaded_files),
+            'total_failed': len(failed_files)
+        }
+
+    except Exception as e:
+        return {'success': False, 'error': str(e)}, 500

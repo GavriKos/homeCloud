@@ -1,4 +1,11 @@
 <div class="list-group">
-  <a href="/admin/folders" class="list-group-item list-group-item-action{% if request.path.startswith('/admin/folders') %} active{% endif %}">{{ _('folder_tree_menu') }}</a>
-  <a href="/admin/shares" class="list-group-item list-group-item-action{% if request.path.startswith('/admin/shares') %} active{% endif %}">{{ _('shares_menu') }}</a>
-</div> 
+  <a href="/admin/folders"
+    class="list-group-item list-group-item-action{% if request.path.startswith('/admin/folders') %} active{% endif %}">{{
+    _('folder_tree_menu') }}</a>
+  <a href="/admin/file-manager"
+    class="list-group-item list-group-item-action{% if request.path.startswith('/admin/file-manager') %} active{% endif %}">{{
+    _('file_manager_menu') }}</a>
+  <a href="/admin/shares"
+    class="list-group-item list-group-item-action{% if request.path.startswith('/admin/shares') %} active{% endif %}">{{
+    _('shares_menu') }}</a>
+</div>
