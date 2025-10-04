@@ -2,6 +2,13 @@ from flask import Flask, g, request, render_template, redirect, url_for, session
 import os
 from config import config
 
+# Initialize HEIC support for Pillow
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass  # pillow-heif not available, HEIC support will be limited
+
 from helpers import get_locale, _, SUPPORTED_LANGS, DEFAULT_LANG
 from admin import admin_bp
 from guest import guest_bp

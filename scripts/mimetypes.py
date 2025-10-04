@@ -5,11 +5,18 @@ Contains functions for determining file types and serving files based on their M
 
 from flask import send_file
 
+# Initialize HEIC support for Pillow
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+except ImportError:
+    pass  # pillow-heif not available, HEIC support will be limited
+
 # Mapping of MIME types to file extensions
 mimetypes_extensions_map = {
     "video": ["mp4", "avi", "mov", "mkv", "webm"],
     "maptrack": ["gpx"],
-    "image": ["jpg", "png", "jpeg", "webp", "gif", "bmp", "tiff", "svg"],
+    "image": ["jpg", "png", "jpeg", "webp", "gif", "bmp", "tiff", "svg", "heic", "heif"],
     "unknown": []
 }
 mimetype_unknown = "unknown"
@@ -18,6 +25,7 @@ mimetype_unknown = "unknown"
 def sendImage(filepath):
     """
     Send image file with appropriate MIME type.
+    For HEIC/HEIF files, converts to JPEG since browsers don't support HEIC natively.
 
     Args:
         filepath (str): Path to the image file
@@ -26,12 +34,41 @@ def sendImage(filepath):
         Response: Flask file response for image
     """
     import os
+    import io
+    from PIL import Image
 
     # Get file extension and determine proper MIME type
     _, ext = os.path.splitext(filepath.lower())
     ext = ext.lstrip('.')
 
-    # Map extensions to MIME types
+    # Check if it's a HEIC/HEIF file that needs conversion
+    if ext in ['heic', 'heif']:
+        # Ensure pillow-heif is registered
+        try:
+            from pillow_heif import register_heif_opener
+            register_heif_opener()
+        except ImportError:
+            # If pillow-heif is not available, send as-is
+            return send_file(filepath, mimetype='image/jpeg')
+
+        try:
+            # Convert HEIC to JPEG in memory for browser compatibility
+            with Image.open(filepath) as img:
+                # Convert to RGB if necessary (HEIC might be in different color space)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+
+                # Create in-memory buffer
+                img_buffer = io.BytesIO()
+                img.save(img_buffer, format='JPEG', quality=85)
+                img_buffer.seek(0)
+
+                return send_file(img_buffer, mimetype='image/jpeg', as_attachment=False)
+        except Exception:
+            # If conversion fails, send as-is
+            return send_file(filepath, mimetype='image/jpeg')
+
+    # For other image formats, send as-is
     mime_map = {
         'jpg': 'image/jpeg',
         'jpeg': 'image/jpeg',
